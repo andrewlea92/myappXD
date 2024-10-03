@@ -41,18 +41,34 @@ export default function App() {
 
   const takePicture = async () => {
     if (cameraRef.current) {
-      const photo = await cameraRef.current.takePictureAsync();
+      const photo = await cameraRef.current.takePictureAsync({ mirror: true });
       setImage(photo.uri);
-      alert('Photo taken!');
+      // alert(photo.uri);
+      console.log(photo.uri);
     }
+  };
+
+  const goBack = () => {
+    setImage(null);
   };
 
   return (
     <View style={styles.container}>
       {image ? (
-        <Image source={{ uri: image }} style={styles.camera} />
+        <View style={styles.container}>
+          <Image source={{ uri: image }} style={styles.camera} />
+          <TouchableOpacity style={styles.backButton} onPress={goBack}>
+            <Text style={styles.text}>Back</Text>
+          </TouchableOpacity>
+        </View>
       ) : (
         <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
+          <View style={styles.grid}>
+            <View style={styles.horizontalLine} />
+            <View style={[styles.horizontalLine, { top: '66.67%' }]} />
+            <View style={styles.verticalLine} />
+            <View style={[styles.verticalLine, { left: '66.67%' }]} />
+          </View>
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
               <Text style={styles.text}>Flip Camera</Text>
@@ -75,6 +91,27 @@ const styles = StyleSheet.create({
   camera: {
     flex: 1,
   },
+  grid: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  horizontalLine: {
+    position: 'absolute',
+    top: '33.33%',
+    left: 0,
+    right: 0,
+    height: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+  },
+  verticalLine: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: '33.33%',
+    width: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+  },
   buttonContainer: {
     flex: 1,
     flexDirection: 'row',
@@ -90,5 +127,13 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: 'white',
+  },
+  backButton: {
+    position: 'absolute',
+    bottom: 20,
+    left: 20,
+    padding: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 5,
   },
 });
