@@ -1,22 +1,40 @@
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 import { Camera, CameraView, useCameraPermissions } from 'expo-camera';
 import { Button, StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import * as React from "react";
+import ImageDisplayScreen from './ImageDisplayScreen'; // Import the new screen
 
-export default function App() {
+const Stack = createStackNavigator();
+
+function CameraScreen({ navigation }) {
   const [facing, setFacing] = React.useState('back');
   const [permission, requestPermission] = useCameraPermissions();
   const [hasMediaLibraryPermission, requestMediaLibraryPermission] = MediaLibrary.usePermissions();
   const cameraRef = React.useRef(null);
   const [hasCameraPermission, setHasCameraPermission] = React.useState(null);
   const [image, setImage] = React.useState(null);
+  const [imageUrls, setImageUrls] = React.useState([]);
 
   React.useEffect(() => {
     (async () => {
       const cameraStatus = await Camera.requestCameraPermissionsAsync();
       setHasCameraPermission(cameraStatus.status === 'granted');
     })();
-  }, []);
+
+    if (imageUrls.length === 3) {
+      navigation.navigate('ImageDisplay', { imageUrls });
+    }
+  }, [imageUrls]);
+
+  React.useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      setImageUrls([]);
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   if (hasCameraPermission === false) {
     return <View />;
@@ -41,10 +59,12 @@ export default function App() {
 
   const takePicture = async () => {
     if (cameraRef.current) {
-      const photo = await cameraRef.current.takePictureAsync({ mirror: true });
+      const photo = await cameraRef.current.takePictureAsync();
+      const asset = await MediaLibrary.createAssetAsync(photo.uri);
       setImage(photo.uri);
       // alert(photo.uri);
-      console.log(photo.uri);
+      // console.log(photo.uri);
+      setImageUrls([...imageUrls, asset.uri]);
     }
   };
 
@@ -54,14 +74,6 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      {image ? (
-        <View style={styles.container}>
-          <Image source={{ uri: image }} style={styles.camera} />
-          <TouchableOpacity style={styles.backButton} onPress={goBack}>
-            <Text style={styles.text}>Back</Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
         <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
           <View style={styles.grid}>
             <View style={styles.horizontalLine} />
@@ -78,8 +90,18 @@ export default function App() {
             </TouchableOpacity>
           </View>
         </CameraView>
-      )}
     </View>
+  );
+}
+
+export default function App() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Camera">
+        <Stack.Screen name="Camera" component={CameraScreen} />
+        <Stack.Screen name="ImageDisplay" component={ImageDisplayScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 

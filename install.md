@@ -44,3 +44,9 @@ npm install expo-camera expo-media-library
 npx expo start
 
 ```
+
+## Used packages
+
+npm install expo-camera expo-media-library
+npm install @react-navigation/native @react-navigation/stack
+npm install react-native-screens react-native-safe-area-context
