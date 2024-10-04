@@ -14,7 +14,6 @@ function CameraScreen({ navigation }) {
   const [hasMediaLibraryPermission, requestMediaLibraryPermission] = MediaLibrary.usePermissions();
   const cameraRef = React.useRef(null);
   const [hasCameraPermission, setHasCameraPermission] = React.useState(null);
-  const [image, setImage] = React.useState(null);
   const [imageUrls, setImageUrls] = React.useState([]);
   const [currentImage, setCurrentImage] = React.useState(0);
 
@@ -31,6 +30,7 @@ function CameraScreen({ navigation }) {
 
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
+      setCurrentImage(0);
       setImageUrls([]);
     });
 
@@ -71,15 +71,10 @@ function CameraScreen({ navigation }) {
       const photo = await cameraRef.current.takePictureAsync();
       setCurrentImage(currentImage + 1);
       const asset = await MediaLibrary.createAssetAsync(photo.uri);
-      setImage(photo.uri);
       // alert(photo.uri);
       // console.log(photo.uri);
       setImageUrls([...imageUrls, asset.uri]);
     }
-  };
-
-  const goBack = () => {
-    setImage(null);
   };
 
   return (
