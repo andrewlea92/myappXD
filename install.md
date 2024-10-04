@@ -42,13 +42,15 @@ mv temp/* Blank/
 rm -rf temp
 
 cd Blank
-npm install expo-camera expo-media-library
+# Install below packages! See next section
 npx expo start
 
 ```
 
 ## Used packages
-
+```
 npm install expo-camera expo-media-library
 npm install @react-navigation/native @react-navigation/stack
 npm install react-native-screens react-native-safe-area-context
+
+```
