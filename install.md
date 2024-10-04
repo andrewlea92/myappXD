@@ -27,6 +27,8 @@ first time (in git shell): create empty project directory and then dump lea's gi
 
 11. npx expo start
 
+-> turns out you have to be under same internet 
+
 later: npx expo start
 
 ### git shell - all in one paste

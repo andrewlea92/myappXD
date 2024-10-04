@@ -16,6 +16,7 @@ function CameraScreen({ navigation }) {
   const [hasCameraPermission, setHasCameraPermission] = React.useState(null);
   const [image, setImage] = React.useState(null);
   const [imageUrls, setImageUrls] = React.useState([]);
+  const [currentImage, setCurrentImage] = React.useState(0);
 
   React.useEffect(() => {
     (async () => {
@@ -52,6 +53,14 @@ function CameraScreen({ navigation }) {
       </View>
     );
   }
+  const renderOverlayImage = () => {
+    if (currentImage === 0 || currentImage === 2) {
+      return <Image source={require('./assets/adaptive-icon.png')} style={styles.overlayImage} />;
+    } else if (currentImage === 1) {
+      return <Image source={require('./assets/splash.png')} style={styles.overlayImage} />;
+    }
+    return null;
+  };
 
   function toggleCameraFacing() {
     setFacing(current => (current === 'back' ? 'front' : 'back'));
@@ -60,6 +69,7 @@ function CameraScreen({ navigation }) {
   const takePicture = async () => {
     if (cameraRef.current) {
       const photo = await cameraRef.current.takePictureAsync();
+      setCurrentImage(currentImage + 1);
       const asset = await MediaLibrary.createAssetAsync(photo.uri);
       setImage(photo.uri);
       // alert(photo.uri);
@@ -75,12 +85,7 @@ function CameraScreen({ navigation }) {
   return (
     <View style={styles.container}>
         <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
-          <View style={styles.grid}>
-            <View style={styles.horizontalLine} />
-            <View style={[styles.horizontalLine, { top: '66.67%' }]} />
-            <View style={styles.verticalLine} />
-            <View style={[styles.verticalLine, { left: '66.67%' }]} />
-          </View>
+          {renderOverlayImage()}
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
               <Text style={styles.text}>Flip Camera</Text>
@@ -113,26 +118,13 @@ const styles = StyleSheet.create({
   camera: {
     flex: 1,
   },
-  grid: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  horizontalLine: {
+  overlayImage: {
     position: 'absolute',
-    top: '33.33%',
-    left: 0,
-    right: 0,
-    height: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.6)',
-  },
-  verticalLine: {
-    position: 'absolute',
-    top: 0,
-    bottom: 0,
-    left: '33.33%',
-    width: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    top: '50%',
+    left: '50%',
+    width: 100,
+    height: 100,
+    transform: [{ translateX: -50 }, { translateY: -50 }],
   },
   buttonContainer: {
     flex: 1,
