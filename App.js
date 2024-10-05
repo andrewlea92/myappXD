@@ -91,6 +91,9 @@ function CameraScreen({ navigation }) {
             </TouchableOpacity>
           </View>
         </CameraView>
+        {currentImage !== null && (
+        <Text style={styles.text}>Current Image: {currentImage}</Text>
+        )}
     </View>
   );
 }

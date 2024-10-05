@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Image, StyleSheet, TextInput, ScrollView, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 
-export default function ProcessedImagesScreen({ route }) {
+export default function ProcessedImagesScreen({ route, navigation }) {
   const { processedUrls } = route.params;
   const [aiText, setAiText] = useState('');
   const [loading, setLoading] = useState(false);
@@ -13,6 +13,12 @@ export default function ProcessedImagesScreen({ route }) {
     setAiText(generatedText);
     setLoading(false);
     console.log('AI 文案 button pressed');
+  };
+
+  const handleNextStep = () => {
+    // Navigate to the next screen or perform the next action
+    console.log('下一步 button pressed');
+    // Example: navigation.navigate('NextScreen');
   };
 
   return (
@@ -35,6 +41,9 @@ export default function ProcessedImagesScreen({ route }) {
           <Text style={styles.buttonText}>AI 文案</Text>
         </TouchableOpacity>
       </View>
+      <TouchableOpacity style={styles.button} onPress={handleNextStep}>
+        <Text style={styles.buttonText}>下一步</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
@@ -84,6 +93,7 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: '#007AFF',
     borderRadius: 5,
+    marginTop: 20,
   },
   buttonText: {
     color: 'white',
