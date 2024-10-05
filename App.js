@@ -92,7 +92,7 @@ function CameraScreen({ navigation }) {
             <Text style={styles.text}>翻轉鏡頭</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={takePicture}>
-            <Text style={styles.text}>照相</Text>
+            <Text style={styles.text}>拍照</Text>
           </TouchableOpacity>
         </View>
       </CameraView>
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 10,
     right: 10,
-    fontSize: 18,
+    fontSize: 36,
     fontWeight: 'bold',
     color: 'white',
   },

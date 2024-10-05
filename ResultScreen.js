@@ -13,15 +13,14 @@ export default function ResultScreen({ route }) {
       for (const url of processedUrls) {
         await MediaLibrary.createAssetAsync(url);
       }
-      Alert.alert('Success', 'Images saved to album');
+      Alert.alert('已成功儲存至手機');
     } catch (error) {
-      Alert.alert('Error', 'Failed to save images');
+      Alert.alert('儲存至手機失敗');
     }
   };
 
   const copyToClipboard = () => {
     Clipboard.setString(aiText);
-    Alert.alert('Copied', 'Text copied to clipboard');
   };
 
   return (

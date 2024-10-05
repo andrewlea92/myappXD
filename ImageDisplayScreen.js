@@ -5,12 +5,20 @@ export default function ImageDisplayScreen({ route, navigation }) {
   const { imageUrls } = route.params;
   const [processedUrls, setProcessedUrls] = useState([]);
   const [showNextButton, setShowNextButton] = useState(false);
+  const [showAlert, setShowAlert] = useState(false); // Add state for alert
 
   const handleAiEdit = async () => {
     // Simulate uploading images to an external API and receiving processed images
     const processed = await simulateApiUploadAndProcess(imageUrls);
     setProcessedUrls(processed);
     setShowNextButton(true);
+    setShowAlert(true); // Show alert
+
+    // Hide alert after 3 seconds
+    setTimeout(() => {
+      setShowAlert(false);
+    }, 1500);
+
     console.log('AI 修圖 button pressed');
   };
 
@@ -30,14 +38,19 @@ export default function ImageDisplayScreen({ route, navigation }) {
           />
         </View>
       ))}
-      <TouchableOpacity style={styles.button} onPress={handleAiEdit}>
-        <Text style={styles.buttonText}>AI 修圖</Text>
-      </TouchableOpacity>
+      {showAlert && (
+        <View style={styles.alertContainer}>
+          <Text style={styles.alertText}>AI 修圖完畢!</Text>
+        </View>
+      )}
       {showNextButton && (
         <TouchableOpacity style={styles.button} onPress={handleNextStep}>
           <Text style={styles.buttonText}>下一步</Text>
         </TouchableOpacity>
       )}
+      <TouchableOpacity style={styles.button} onPress={handleAiEdit}>
+        <Text style={styles.buttonText}>AI 修圖</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }
@@ -49,7 +62,6 @@ const simulateApiUploadAndProcess = async (imageUrls) => {
   // Simulate processed image URLs (in a real scenario, these would be returned by the API)
   return imageUrls.map(url => `${url}?processed=true`);
 };
-
 
 const styles = StyleSheet.create({
   container: {
@@ -79,6 +91,17 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  alertContainer: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: '#FFD700',
+    borderRadius: 5,
+  },
+  alertText: {
+    color: 'black',
     fontSize: 18,
     fontWeight: 'bold',
   },

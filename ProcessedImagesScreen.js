@@ -30,7 +30,7 @@ export default function ProcessedImagesScreen({ route, navigation }) {
       ))}
       <TextInput
         style={styles.input}
-        placeholder="Enter text here"
+        placeholder="輸入簡短文案"
         value={aiText}
         onChangeText={setAiText} // Update state on text change
       />
