@@ -23,11 +23,7 @@ function CameraScreen({ navigation }) {
       const cameraStatus = await Camera.requestCameraPermissionsAsync();
       setHasCameraPermission(cameraStatus.status === 'granted');
     })();
-
-    if (imageUrls.length === 3) {
-      navigation.navigate('ImageDisplay', { imageUrls });
-    }
-  }, [imageUrls]);
+  }, []);
 
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -54,13 +50,14 @@ function CameraScreen({ navigation }) {
       </View>
     );
   }
+
   const renderOverlayImage = () => {
     if (currentImage === 0 || currentImage === 2) {
       return <Image source={require('./assets/adaptive-icon.png')} style={styles.overlayImage} />;
     } else if (currentImage === 1) {
       return <Image source={require('./assets/splash.png')} style={styles.overlayImage} />;
-    }
-    return null;
+    } 
+    return <Image style={styles.emptyOverlayImage} />; // 返回一个空的 Image 组件;
   };
 
   function toggleCameraFacing() {
@@ -72,28 +69,35 @@ function CameraScreen({ navigation }) {
       const photo = await cameraRef.current.takePictureAsync();
       setCurrentImage(currentImage + 1);
       const asset = await MediaLibrary.createAssetAsync(photo.uri);
-      // alert(photo.uri);
-      // console.log(photo.uri);
       setImageUrls([...imageUrls, asset.uri]);
     }
   };
 
+  const navigateToImageDisplay = () => {
+    navigation.navigate('ImageDisplay', { imageUrls });
+  };
+
   return (
     <View style={styles.container}>
-        <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
-          {renderOverlayImage()}
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
-              <Text style={styles.text}>Flip Camera</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={takePicture}>
-              <Text style={styles.text}>Take Photo</Text>
-            </TouchableOpacity>
-          </View>
-        </CameraView>
-        {currentImage !== null && (
+      <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
+        {renderOverlayImage()}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
+            <Text style={styles.text}>Flip Camera</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={takePicture}>
+            <Text style={styles.text}>Take Photo</Text>
+          </TouchableOpacity>
+        </View>
+      </CameraView>
+      {currentImage !== null && (
         <Text style={styles.text}>Current Image: {currentImage}</Text>
-        )}
+      )}
+      {imageUrls.length === 3 && (
+        <TouchableOpacity style={styles.nextButton} onPress={navigateToImageDisplay}>
+          <Text style={styles.text}>Next Step</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -126,6 +130,11 @@ const styles = StyleSheet.create({
     height: 100,
     transform: [{ translateX: -50 }, { translateY: -50 }],
   },
+  emptyOverlayImage: {
+    width: 0,
+    height: 0,
+    opacity: 0,
+  },
   buttonContainer: {
     flex: 1,
     flexDirection: 'row',
@@ -141,5 +150,12 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: 'white',
+  },
+  nextButton: {
+    alignSelf: 'center',
+    padding: 10,
+    backgroundColor: 'blue',
+    borderRadius: 5,
+    marginTop: 20,
   },
 });
