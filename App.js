@@ -5,6 +5,7 @@ import { Button, StyleSheet, Text, TouchableOpacity, View, Image } from 'react-n
 import * as MediaLibrary from 'expo-media-library';
 import * as React from "react";
 import ImageDisplayScreen from './ImageDisplayScreen'; // Import the new screen
+import ProcessedImagesScreen from './ProcessedImagesScreen';
 
 const Stack = createStackNavigator();
 
@@ -100,6 +101,7 @@ export default function App() {
       <Stack.Navigator initialRouteName="Camera">
         <Stack.Screen name="Camera" component={CameraScreen} />
         <Stack.Screen name="ImageDisplay" component={ImageDisplayScreen} />
+        <Stack.Screen name="ProcessedImages" component={ProcessedImagesScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -136,13 +138,5 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: 'white',
-  },
-  backButton: {
-    position: 'absolute',
-    bottom: 20,
-    left: 20,
-    padding: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    borderRadius: 5,
   },
 });
