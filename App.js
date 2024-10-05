@@ -36,6 +36,12 @@ function CameraScreen({ navigation }) {
     return unsubscribe;
   }, [navigation]);
 
+  React.useEffect(() => {
+    if (imageCount === 3) {
+      navigation.navigate('ImageDisplay', { imageUrls });
+    }
+  }, [imageCount, imageUrls, navigation]);
+
   if (hasCameraPermission === false) {
     return <View />;
   }
@@ -77,10 +83,6 @@ function CameraScreen({ navigation }) {
     }
   };
 
-  const navigateToImageDisplay = () => {
-    navigation.navigate('ImageDisplay', { imageUrls });
-  };
-
   return (
     <View style={styles.container}>
       <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
@@ -96,11 +98,6 @@ function CameraScreen({ navigation }) {
       </CameraView>
       {loading && <ActivityIndicator size="large" color="#007AFF" style={styles.loadingIndicator}/>}
       <Text style={styles.imageCountText}>{imageCount} / 3</Text>
-      {imageUrls.length === 3 && (
-        <TouchableOpacity style={styles.nextButton} onPress={navigateToImageDisplay}>
-          <Text style={styles.text}>Next Step</Text>
-        </TouchableOpacity>
-      )}
     </View>
   );
 }
@@ -154,13 +151,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: 'white',
-  },
-  nextButton: {
-    alignSelf: 'center',
-    padding: 10,
-    backgroundColor: 'blue',
-    borderRadius: 5,
-    marginTop: 20,
   },
   imageCountText: {
     position: 'absolute',
