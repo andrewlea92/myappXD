@@ -16,9 +16,9 @@ export default function ProcessedImagesScreen({ route, navigation }) {
   };
 
   const handleNextStep = () => {
-    // Navigate to the next screen or perform the next action
+    // Navigate to the Result screen
+    navigation.navigate('Result', { processedUrls, aiText });
     console.log('下一步 button pressed');
-    // Example: navigation.navigate('NextScreen');
   };
 
   return (

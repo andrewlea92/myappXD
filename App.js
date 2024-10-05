@@ -6,6 +6,7 @@ import * as MediaLibrary from 'expo-media-library';
 import * as React from "react";
 import ImageDisplayScreen from './ImageDisplayScreen'; // Import the new screen
 import ProcessedImagesScreen from './ProcessedImagesScreen';
+import ResultScreen from './ResultScreen';
 
 const Stack = createStackNavigator();
 
@@ -68,7 +69,7 @@ function CameraScreen({ navigation }) {
     if (cameraRef.current) {
       const photo = await cameraRef.current.takePictureAsync();
       setCurrentImage(currentImage + 1);
-      const asset = await MediaLibrary.createAssetAsync(photo.uri);
+      const asset = photo;
       setImageUrls([...imageUrls, asset.uri]);
     }
   };
@@ -109,6 +110,7 @@ export default function App() {
         <Stack.Screen name="Camera" component={CameraScreen} />
         <Stack.Screen name="ImageDisplay" component={ImageDisplayScreen} />
         <Stack.Screen name="ProcessedImages" component={ProcessedImagesScreen} />
+        <Stack.Screen name="Result" component={ResultScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
