@@ -17,7 +17,7 @@ function CameraScreen({ navigation }) {
   const cameraRef = React.useRef(null);
   const [hasCameraPermission, setHasCameraPermission] = React.useState(null);
   const [imageUrls, setImageUrls] = React.useState([]);
-  const [currentImage, setCurrentImage] = React.useState(0);
+  const [imageCount, setImageCount] = React.useState(0);
 
   React.useEffect(() => {
     (async () => {
@@ -28,7 +28,7 @@ function CameraScreen({ navigation }) {
 
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
-      setCurrentImage(0);
+      setImageCount(0);
       setImageUrls([]);
     });
 
@@ -53,9 +53,9 @@ function CameraScreen({ navigation }) {
   }
 
   const renderOverlayImage = () => {
-    if (currentImage === 0 || currentImage === 2) {
+    if (imageCount === 0 || imageCount === 2) {
       return <Image source={require('./assets/adaptive-icon.png')} style={styles.overlayImage} />;
-    } else if (currentImage === 1) {
+    } else if (imageCount === 1) {
       return <Image source={require('./assets/splash.png')} style={styles.overlayImage} />;
     } 
     return <Image style={styles.emptyOverlayImage} />; // 返回一个空的 Image 组件;
@@ -68,7 +68,7 @@ function CameraScreen({ navigation }) {
   const takePicture = async () => {
     if (cameraRef.current) {
       const photo = await cameraRef.current.takePictureAsync();
-      setCurrentImage(currentImage + 1);
+      setImageCount(imageCount + 1);
       const asset = photo;
       setImageUrls([...imageUrls, asset.uri]);
     }
@@ -91,8 +91,9 @@ function CameraScreen({ navigation }) {
           </TouchableOpacity>
         </View>
       </CameraView>
-      {currentImage !== null && (
-        <Text style={styles.text}>Current Image: {currentImage}</Text>
+      <Text style={styles.imageCountText}>{imageCount} / 3</Text>
+      {imageCount !== null && (
+        <Text style={styles.text}>Current Image: {imageCount}</Text>
       )}
       {imageUrls.length === 3 && (
         <TouchableOpacity style={styles.nextButton} onPress={navigateToImageDisplay}>
@@ -159,5 +160,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'blue',
     borderRadius: 5,
     marginTop: 20,
+  },
+  imageCountText: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'white',
   },
 });
