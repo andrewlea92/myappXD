@@ -92,9 +92,6 @@ function CameraScreen({ navigation }) {
         </View>
       </CameraView>
       <Text style={styles.imageCountText}>{imageCount} / 3</Text>
-      {imageCount !== null && (
-        <Text style={styles.text}>Current Image: {imageCount}</Text>
-      )}
       {imageUrls.length === 3 && (
         <TouchableOpacity style={styles.nextButton} onPress={navigateToImageDisplay}>
           <Text style={styles.text}>Next Step</Text>
