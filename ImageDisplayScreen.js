@@ -28,7 +28,6 @@ export default function ImageDisplayScreen({ route, navigation }) {
             source={{ uri: url }}
             style={styles.image}
           />
-          <Text style={styles.urlText}>{url.slice(-15)}</Text>
         </View>
       ))}
       <TouchableOpacity style={styles.button} onPress={handleAiEdit}>

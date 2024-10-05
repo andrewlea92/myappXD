@@ -26,7 +26,6 @@ export default function ProcessedImagesScreen({ route, navigation }) {
       {processedUrls.map((url, index) => (
         <View key={index} style={styles.imageContainer}>
           <Image source={{ uri: url }} style={styles.image} />
-          <Text style={styles.urlText}>{url.slice(-15)}</Text>
         </View>
       ))}
       <TextInput

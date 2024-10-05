@@ -89,10 +89,10 @@ function CameraScreen({ navigation }) {
         {renderOverlayImage()}
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
-            <Text style={styles.text}>Flip Camera</Text>
+            <Text style={styles.text}>翻轉鏡頭</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={takePicture}>
-            <Text style={styles.text}>Take Photo</Text>
+            <Text style={styles.text}>照相</Text>
           </TouchableOpacity>
         </View>
       </CameraView>

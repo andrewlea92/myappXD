@@ -30,11 +30,11 @@ export default function ResultScreen({ route }) {
         <Image key={index} source={{ uri: url }} style={styles.image} />
       ))}
       <TouchableOpacity style={styles.button} onPress={saveToAlbum}>
-        <Text style={styles.buttonText}>Save to Album</Text>
+        <Text style={styles.buttonText}>儲存至手機</Text>
       </TouchableOpacity>
       <Text style={styles.aiText}>{aiText}</Text>
       <TouchableOpacity style={styles.button} onPress={copyToClipboard}>
-        <Text style={styles.buttonText}>Copy Text</Text>
+        <Text style={styles.buttonText}>複製文案</Text>
       </TouchableOpacity>
     </ScrollView>
   );
