@@ -1,7 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Camera, CameraView, useCameraPermissions } from 'expo-camera';
-import { Button, StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
+import { Button, StyleSheet, Text, TouchableOpacity, View, Image, ActivityIndicator } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import * as React from "react";
 import ImageDisplayScreen from './ImageDisplayScreen'; // Import the new screen
@@ -18,6 +18,7 @@ function CameraScreen({ navigation }) {
   const [hasCameraPermission, setHasCameraPermission] = React.useState(null);
   const [imageUrls, setImageUrls] = React.useState([]);
   const [imageCount, setImageCount] = React.useState(0);
+  const [loading, setLoading] = React.useState(false);
 
   React.useEffect(() => {
     (async () => {
@@ -67,10 +68,12 @@ function CameraScreen({ navigation }) {
 
   const takePicture = async () => {
     if (cameraRef.current) {
+      setTimeout(() => setLoading(true), 250); // Show after blinking effect with delay
       const photo = await cameraRef.current.takePictureAsync();
       setImageCount(imageCount + 1);
       const asset = photo;
       setImageUrls([...imageUrls, asset.uri]);
+      setLoading(false);
     }
   };
 
@@ -91,6 +94,7 @@ function CameraScreen({ navigation }) {
           </TouchableOpacity>
         </View>
       </CameraView>
+      {loading && <ActivityIndicator size="large" color="#007AFF" style={styles.loadingIndicator}/>}
       <Text style={styles.imageCountText}>{imageCount} / 3</Text>
       {imageUrls.length === 3 && (
         <TouchableOpacity style={styles.nextButton} onPress={navigateToImageDisplay}>
@@ -165,5 +169,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: 'white',
+  },
+  loadingIndicator: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{ translateX: -50 }, { translateY: -50 }],
   },
 });
