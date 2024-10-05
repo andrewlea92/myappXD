@@ -1,8 +1,19 @@
-import React from 'react';
-import { View, Image, StyleSheet, TextInput, ScrollView, Text } from 'react-native';
+import React, { useState } from 'react';
+import { View, Image, StyleSheet, TextInput, ScrollView, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 
 export default function ProcessedImagesScreen({ route }) {
   const { processedUrls } = route.params;
+  const [aiText, setAiText] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleAiText = async () => {
+    setLoading(true);
+    // Simulate generating AI text using OpenAI API
+    const generatedText = await simulateOpenAiApiCall();
+    setAiText(generatedText);
+    setLoading(false);
+    console.log('AI 文案 button pressed');
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -12,10 +23,29 @@ export default function ProcessedImagesScreen({ route }) {
           <Text style={styles.urlText}>{url.slice(-15)}</Text>
         </View>
       ))}
-      <TextInput style={styles.input} placeholder="Enter text here" />
+      <TextInput
+        style={styles.input}
+        placeholder="Enter text here"
+        value={aiText}
+        onChangeText={setAiText} // Update state on text change
+      />
+      <View style={styles.buttonContainer}>
+        {loading && <ActivityIndicator size="small" color="#007AFF" style={styles.loadingIndicator} />}
+        <TouchableOpacity style={styles.button} onPress={handleAiText} disabled={loading}>
+          <Text style={styles.buttonText}>AI 文案</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 }
+
+const simulateOpenAiApiCall = async () => {
+  // Simulate a delay for the API call
+  await new Promise(resolve => setTimeout(resolve, 2000));
+
+  // Simulate the response from OpenAI API
+  return '這是 AI 生成的文案';
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -44,5 +74,23 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: 10,
     marginTop: 20,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  button: {
+    padding: 10,
+    backgroundColor: '#007AFF',
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  loadingIndicator: {
+    marginRight: 10,
   },
 });
