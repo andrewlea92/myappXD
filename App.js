@@ -19,6 +19,7 @@ function CameraScreen({ navigation }) {
   const [imageUrls, setImageUrls] = React.useState([]);
   const [imageCount, setImageCount] = React.useState(0);
   const [loading, setLoading] = React.useState(false);
+  const [overlayImage, setOverlayImage] = React.useState(null);
 
   React.useEffect(() => {
     (async () => {
@@ -60,12 +61,8 @@ function CameraScreen({ navigation }) {
   }
 
   const renderOverlayImage = () => {
-    if (imageCount === 0) {
-      return <Image source={require('./assets/pose/1.png')} style={styles.overlayImage} />;
-    } else if (imageCount === 1) {
-      return <Image source={require('./assets/pose/2.png')} style={styles.overlayImage} />;
-    } else if (imageCount === 2) {
-      return <Image source={require('./assets/pose/3.png')} style={styles.overlayImage} />;
+    if (overlayImage) {
+      return <Image source={overlayImage} style={styles.overlayImage} />;
     }
     return <Image style={styles.emptyOverlayImage} />; // 返回一个空的 Image 组件;
   };
@@ -85,6 +82,15 @@ function CameraScreen({ navigation }) {
     }
   };
 
+  const handleAiOverlay = async () => {
+    setLoading(true);
+    // Simulate generating AI overlay image
+    const overlayImage = await simulateAiOverlay();
+    setOverlayImage(overlayImage);
+    setLoading(false);
+    console.log('AI 覆蓋 button pressed');
+  };
+
   return (
     <View style={styles.container}>
       <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
@@ -95,6 +101,13 @@ function CameraScreen({ navigation }) {
           <TouchableOpacity style={styles.button} onPress={takePicture}>
             <Text style={styles.text}>拍照</Text>
           </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={handleAiOverlay} disabled={loading}>
+            {loading ? (
+              <ActivityIndicator size="small" color="#007AFF" />
+            ) : (
+              <Text style={styles.text}>AI 框線提示</Text>
+            )}
+          </TouchableOpacity>
         </View>
         {renderOverlayImage()}
       </CameraView>
@@ -102,6 +115,21 @@ function CameraScreen({ navigation }) {
       <Text style={styles.imageCountText}>{imageCount} / 3</Text>
     </View>
   );
+}
+
+const simulateAiOverlay = async () => {
+  // Simulate a delay for the AI overlay generation
+  await new Promise(resolve => setTimeout(resolve, 1000));
+
+  const images = [
+    require('./assets/pose/1.png'),
+    require('./assets/pose/2.png'),
+    require('./assets/pose/3.png'),
+  ];
+  const randomImage = images[Math.floor(Math.random() * images.length)];
+
+  // Simulate the AI overlay image (in a real scenario, this would be returned by the API)
+  return randomImage;
 }
 
 export default function App() {
