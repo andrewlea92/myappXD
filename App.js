@@ -60,11 +60,13 @@ function CameraScreen({ navigation }) {
   }
 
   const renderOverlayImage = () => {
-    if (imageCount === 0 || imageCount === 2) {
-      return <Image source={require('./assets/adaptive-icon.png')} style={styles.overlayImage} />;
+    if (imageCount === 0) {
+      return <Image source={require('./assets/pose/1.png')} style={styles.overlayImage} />;
     } else if (imageCount === 1) {
-      return <Image source={require('./assets/splash.png')} style={styles.overlayImage} />;
-    } 
+      return <Image source={require('./assets/pose/2.png')} style={styles.overlayImage} />;
+    } else if (imageCount === 2) {
+      return <Image source={require('./assets/pose/3.png')} style={styles.overlayImage} />;
+    }
     return <Image style={styles.emptyOverlayImage} />; // 返回一个空的 Image 组件;
   };
 
@@ -86,7 +88,6 @@ function CameraScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
-        {renderOverlayImage()}
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
             <Text style={styles.text}>翻轉鏡頭</Text>
@@ -95,6 +96,7 @@ function CameraScreen({ navigation }) {
             <Text style={styles.text}>拍照</Text>
           </TouchableOpacity>
         </View>
+        {renderOverlayImage()}
       </CameraView>
       {loading && <ActivityIndicator size="large" color="#007AFF" style={styles.loadingIndicator}/>}
       <Text style={styles.imageCountText}>{imageCount} / 3</Text>
@@ -125,11 +127,10 @@ const styles = StyleSheet.create({
   },
   overlayImage: {
     position: 'absolute',
-    top: '50%',
-    left: '50%',
-    width: 100,
-    height: 100,
-    transform: [{ translateX: -50 }, { translateY: -50 }],
+    top: '-25%',
+    left: '-25%',
+    width: '150%',
+    height: '150%',
   },
   emptyOverlayImage: {
     width: 0,
