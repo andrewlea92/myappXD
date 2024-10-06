@@ -7,6 +7,7 @@ import * as React from "react";
 import ImageDisplayScreen from './ImageDisplayScreen'; // Import the new screen
 import ProcessedImagesScreen from './ProcessedImagesScreen';
 import ResultScreen from './ResultScreen';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const Stack = createStackNavigator();
 
@@ -98,15 +99,11 @@ function CameraScreen({ navigation }) {
           <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
             <Text style={styles.text}>翻轉鏡頭</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={takePicture}>
-            <Text style={styles.text}>拍照</Text>
+          <TouchableOpacity style={styles.circleButton} onPress={takePicture} disabled={loading}>
+            <Icon name="camera" size={30} color="white" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={handleAiOverlay} disabled={loading}>
-            {loading ? (
-              <ActivityIndicator size="small" color="#007AFF" />
-            ) : (
-              <Text style={styles.text}>AI 框線提示</Text>
-            )}
+            <Text style={styles.text}>AI 框線提示</Text>
           </TouchableOpacity>
         </View>
         {renderOverlayImage()}
@@ -175,6 +172,16 @@ const styles = StyleSheet.create({
     flex: 1,
     alignSelf: 'flex-end',
     alignItems: 'center',
+  },
+  circleButton: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#007AFF',
+    justifyContent: 'center',
+    alignSelf: 'flex-end',
+    alignItems: 'center',
+    marginHorizontal: 10,
   },
   text: {
     fontSize: 24,
