@@ -8,7 +8,7 @@ import ImageDisplayScreen from './ImageDisplayScreen'; // Import the new screen
 import ProcessedImagesScreen from './ProcessedImagesScreen';
 import ResultScreen from './ResultScreen';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { simulateAiOverlay } from './AiApiHandler';
+import { generateAiOverlay } from './AiApiHandler';
 
 const Stack = createStackNavigator();
 
@@ -89,8 +89,8 @@ function CameraScreen({ navigation }) {
       setTimeout(() => setLoading(true), 250); // Show after blinking effect with delay
       const photo = await cameraRef.current.takePictureAsync();
       
-      // Call simulateAiOverlay with the photo URI and image count
-      const overlayImage = await simulateAiOverlay(photo.uri);
+      // Call generateAiOverlay with the photo URI
+      const overlayImage = await generateAiOverlay(photo.uri);
       setOverlayImage(overlayImage);
   
       setLoading(false);
