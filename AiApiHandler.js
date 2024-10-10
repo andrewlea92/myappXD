@@ -43,10 +43,8 @@ export const simulateAiOverlay = async (imageUri) => {
   };  
 
   // Upload the image first
-  await uploadImage(imageUri); // Upload the captured image
-
-  // Fetch the random number after uploading the image
-  const randomNum = await fetchRandomNum();
+  const return_msg = await uploadImage(imageUri); // Upload the captured image
+  const num = return_msg.response; // Get the number response from the server
 
   // Load the corresponding image based on the random number
   const images = [
@@ -54,7 +52,8 @@ export const simulateAiOverlay = async (imageUri) => {
     require('./assets/pose/2.png'),
     require('./assets/pose/3.png'),
   ];
-  const randomImage = images[randomNum];
-
+  const randomImage = images[(num - 1) % images.length]; // Select the image based on the number
+  // return num is 1-based index
+  
   return randomImage; // Return the selected overlay image
 };
