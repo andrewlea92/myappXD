@@ -8,6 +8,7 @@ import ImageDisplayScreen from './ImageDisplayScreen'; // Import the new screen
 import ProcessedImagesScreen from './ProcessedImagesScreen';
 import ResultScreen from './ResultScreen';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { simulateAiOverlay } from './AiApiHandler';
 
 const Stack = createStackNavigator();
 
@@ -112,21 +113,6 @@ function CameraScreen({ navigation }) {
       <Text style={styles.imageCountText}>{imageCount} / 3</Text>
     </View>
   );
-}
-
-const simulateAiOverlay = async () => {
-  // Simulate a delay for the AI overlay generation
-  await new Promise(resolve => setTimeout(resolve, 1000));
-
-  const images = [
-    require('./assets/pose/1.png'),
-    require('./assets/pose/2.png'),
-    require('./assets/pose/3.png'),
-  ];
-  const randomImage = images[Math.floor(Math.random() * images.length)];
-
-  // Simulate the AI overlay image (in a real scenario, this would be returned by the API)
-  return randomImage;
 }
 
 export default function App() {
