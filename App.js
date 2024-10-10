@@ -85,12 +85,16 @@ function CameraScreen({ navigation }) {
   };
 
   const handleAiOverlay = async () => {
-    setLoading(true);
-    // Simulate generating AI overlay image
-    const overlayImage = await simulateAiOverlay();
-    setOverlayImage(overlayImage);
-    setLoading(false);
-    console.log('AI 覆蓋 button pressed');
+    if (cameraRef.current) {
+      setTimeout(() => setLoading(true), 250); // Show after blinking effect with delay
+      const photo = await cameraRef.current.takePictureAsync();
+      
+      const overlayImage = await simulateAiOverlay();
+      setOverlayImage(overlayImage);
+
+      setLoading(false);
+      console.log('AI 覆蓋 button pressed');
+    }
   };
 
   return (
