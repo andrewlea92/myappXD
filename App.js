@@ -89,13 +89,15 @@ function CameraScreen({ navigation }) {
       setTimeout(() => setLoading(true), 250); // Show after blinking effect with delay
       const photo = await cameraRef.current.takePictureAsync();
       
-      const overlayImage = await simulateAiOverlay();
+      // Call simulateAiOverlay with the photo URI and image count
+      const overlayImage = await simulateAiOverlay(photo.uri);
       setOverlayImage(overlayImage);
-
+  
       setLoading(false);
       console.log('AI 覆蓋 button pressed');
     }
   };
+  
 
   return (
     <View style={styles.container}>
