@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Image, StyleSheet, TouchableOpacity, Text, ScrollView } from 'react-native';
+import { generateAiProcessedImage, simulateApiUploadAndProcess } from './AiApiHandler';
 
 export default function ImageDisplayScreen({ route, navigation }) {
   const { imageUrls } = route.params;
@@ -9,7 +10,7 @@ export default function ImageDisplayScreen({ route, navigation }) {
 
   const handleAiEdit = async () => {
     // Simulate uploading images to an external API and receiving processed images
-    const processed = await simulateApiUploadAndProcess(imageUrls);
+    const processed = await generateAiProcessedImage(imageUrls);
     setProcessedUrls(processed);
     setShowNextButton(true);
     setShowAlert(true); // Show alert
@@ -54,14 +55,6 @@ export default function ImageDisplayScreen({ route, navigation }) {
     </ScrollView>
   );
 }
-
-const simulateApiUploadAndProcess = async (imageUrls) => {
-  // Simulate a delay for the API call
-  await new Promise(resolve => setTimeout(resolve, 500));
-
-  // Simulate processed image URLs (in a real scenario, these would be returned by the API)
-  return imageUrls.map(url => `${url}?processed=true`);
-};
 
 const styles = StyleSheet.create({
   container: {

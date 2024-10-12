@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Image, StyleSheet, TextInput, ScrollView, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { generateAiCaption } from './AiApiHandler';
 
 export default function ProcessedImagesScreen({ route, navigation }) {
   const { processedUrls } = route.params;
@@ -9,7 +10,7 @@ export default function ProcessedImagesScreen({ route, navigation }) {
   const handleAiText = async () => {
     setLoading(true);
     // Simulate generating AI text using OpenAI API
-    const generatedText = await simulateOpenAiApiCall();
+    const generatedText = await generateAiCaption('這是一個測試文案');
     setAiText(generatedText);
     setLoading(false);
     console.log('AI 文案 button pressed');
@@ -46,14 +47,6 @@ export default function ProcessedImagesScreen({ route, navigation }) {
     </ScrollView>
   );
 }
-
-const simulateOpenAiApiCall = async () => {
-  // Simulate a delay for the API call
-  await new Promise(resolve => setTimeout(resolve, 2000));
-
-  // Simulate the response from OpenAI API
-  return '這是 AI 生成的文案';
-};
 
 const styles = StyleSheet.create({
   container: {
