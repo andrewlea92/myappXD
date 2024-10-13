@@ -144,10 +144,10 @@ const styles = StyleSheet.create({
   },
   overlayImage: {
     position: 'absolute',
-    top: '-25%',
-    left: '-25%',
-    width: '150%',
-    height: '150%',
+    // top: '-25%',
+    // left: '-25%',
+    width: '100%',
+    height: '100%',
   },
   emptyOverlayImage: {
     width: 0,

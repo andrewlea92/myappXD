@@ -10,7 +10,7 @@ export default function ProcessedImagesScreen({ route, navigation }) {
   const handleAiText = async () => {
     setLoading(true);
     // Simulate generating AI text using OpenAI API
-    const generatedText = await generateAiCaption('這是一個測試文案');
+    const generatedText = await generateAiCaption(aiText);
     setAiText(generatedText);
     setLoading(false);
     console.log('AI 文案 button pressed');
