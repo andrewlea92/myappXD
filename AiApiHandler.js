@@ -62,27 +62,13 @@ export const generateAiOverlay = async (imageUri) => {
 
   // Load the corresponding image based on the overlay number
   const overlayImages = [
-    require('./assets/pose/1.png'),
-    require('./assets/pose/2.png'),
-    require('./assets/pose/3.png'),
-    require('./assets/pose/4.png'),
-    require('./assets/pose/5.png'),
-    require('./assets/pose/6.png'),
-    require('./assets/pose/7.png'),
-    require('./assets/pose/8.png'),
-    require('./assets/pose/9.png'),
-    require('./assets/pose/10.png'),
-    require('./assets/pose/11.png'),
-    require('./assets/pose/12.png'),
-    require('./assets/pose/13.png'),
-    require('./assets/pose/14.png'),
-    require('./assets/pose/15.png'),
-    require('./assets/pose/16.png'),
-    require('./assets/pose/17.png'),
-    require('./assets/pose/18.png'),
-    require('./assets/pose/19.png'),
-    require('./assets/pose/20.png'),
-    require('./assets/pose/21.png'),
+    require('./assets/milk/1.png'),
+    require('./assets/milk/2.png'),
+    require('./assets/milk/3.png'),
+    require('./assets/milk/4.png'),
+    require('./assets/milk/5.png'),
+    require('./assets/milk/6.png'),
+    require('./assets/milk/7.png'),
   ];
   const selectedOverlayImage = overlayImages[(overlayNumber - 1) % overlayImages.length]; // Select the image based on the number
   // overlayNumber is 1-based index
