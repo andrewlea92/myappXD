@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Image, StyleSheet, TouchableOpacity, Text, ScrollView } from 'react-native';
-import { generateAiProcessedImage, simulateApiUploadAndProcess } from './AiApiHandler';
+import { generateAiProcessedImage } from './AiApiHandler';
 
 export default function ImageDisplayScreen({ route, navigation }) {
   const { imageUrls } = route.params;

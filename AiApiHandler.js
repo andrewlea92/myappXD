@@ -122,6 +122,16 @@ export const generateAiProcessedImage = async (imageUrls) => {
     }
   };
 
+  // Helper function to convert Blob to Base64
+  const blobToBase64 = (blob) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  };
+
   // Function to get processed images from the backend
   const getProcessedImageFromBackend = async (filePath) => {
     try {
@@ -133,9 +143,10 @@ export const generateAiProcessedImage = async (imageUrls) => {
         },
         body: JSON.stringify({ file_path: filePath })
       });
-      const responseData = await response.json();
-      console.log('Processed image from server:', responseData);
-      return responseData.response;
+      const blob = await response.blob();
+      const base64Image = await blobToBase64(blob); // Convert Blob to Base64
+      console.log('Processed image from server:', base64Image.substring(0, 100));
+      return `data:image/jpeg;base64,${base64Image}`; // Return Base64 data URL
     } catch (error) {
       console.error('Error getting processed image:', error);
       throw error; // Re-throw error to handle it in the calling function
@@ -145,11 +156,10 @@ export const generateAiProcessedImage = async (imageUrls) => {
   const processedImageUrls = []; // List to store processed image URLs
 
   for (const url of imageUrls) {
-    // for testing purpose, we will skip the upload image to backend
-    // const filePath = await uploadImageToBackend(url); // Upload each image to the backend
+    const filePath = await uploadImageToBackend(url); // Upload each image to the backend
 
-    const processedImageUrl = await getProcessedImageFromBackend(url); // Get the processed image from the server
-    
+    const processedImageUrl = await getProcessedImageFromBackend(filePath); // Get the processed image from the server
+
     processedImageUrls.push(processedImageUrl); // Add the processed image URL to the list
   }
 
