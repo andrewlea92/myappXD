@@ -1,6 +1,6 @@
-const nthu_drom_backend = 'http://192.168.0.101:5000';
+const nthu_drom_backend = 'http://192.168.0.104:5000';
 const my_home_backend = 'http://192.168.50.74:5000';
-const backend_root = my_home_backend;
+const backend_root = nthu_drom_backend;
 
 export const generateAiOverlay = async (imageUri) => {
   // Function to upload the image to the backend
@@ -53,6 +53,43 @@ export const generateAiOverlay = async (imageUri) => {
       throw error; // Re-throw error to handle it in the calling function
     }
   };
+
+  // Helper function to convert Blob to Base64
+  const blobToBase64 = (blob) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  };
+
+  // Function to get the overlay image from the backend
+  const getOverlayImageFromBackend = async (filePath) => {
+    try {
+      const response = await fetch(`${backend_root}/get_overlay_image`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({ file_path: filePath })
+      });
+      const blob = await response.blob();
+      const base64Image = await blobToBase64(blob); // Convert Blob to Base64
+      console.log('Overlay image from server:', base64Image.substring(0, 100));
+      return `data:image/jpeg;base64,${base64Image}`; // Return Base64 data Url
+    }
+    catch (error) {
+      console.error('Error getting overlay image:', error);
+      throw error; // Re-throw error to handle it in the calling function
+    }
+  };
+
+  // for testing straight to get overlay image
+  const filePath_test = imageUri;
+  const overlayImageUrl = await getOverlayImageFromBackend(filePath_test); // Get the overlay image from the server
+  return overlayImageUrl; // Return the overlay image
 
   // Upload the image first
   const filePath = await uploadImageToBackend(imageUri); // Upload the captured image and get the file path

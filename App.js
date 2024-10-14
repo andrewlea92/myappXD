@@ -21,7 +21,7 @@ function CameraScreen({ navigation }) {
   const [imageUrls, setImageUrls] = React.useState([]);
   const [imageCount, setImageCount] = React.useState(0);
   const [loading, setLoading] = React.useState(false);
-  const [overlayImage, setOverlayImage] = React.useState(null);
+  const [overlayImageUrl, setOverlayImageUrl] = React.useState(null);
 
   React.useEffect(() => {
     (async () => {
@@ -63,8 +63,8 @@ function CameraScreen({ navigation }) {
   }
 
   const renderOverlayImage = () => {
-    if (overlayImage) {
-      return <Image source={overlayImage} style={styles.overlayImage} />;
+    if (overlayImageUrl) {
+      return <Image source={{ uri: overlayImageUrl }} style={styles.overlayImage} />;
     }
     return <Image style={styles.emptyOverlayImage} />; // 返回一个空的 Image 组件;
   };
@@ -90,8 +90,8 @@ function CameraScreen({ navigation }) {
       const photo = await cameraRef.current.takePictureAsync();
       
       // Call generateAiOverlay with the photo URI
-      const overlayImage = await generateAiOverlay(photo.uri);
-      setOverlayImage(overlayImage);
+      const imageUrl = await generateAiOverlay(photo.uri);
+      setOverlayImageUrl(imageUrl);
   
       setLoading(false);
       console.log('AI 覆蓋 button pressed');
