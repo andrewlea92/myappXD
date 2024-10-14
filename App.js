@@ -1,7 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Camera, CameraView, useCameraPermissions } from 'expo-camera';
-import { Button, StyleSheet, Text, TouchableOpacity, View, Image, ActivityIndicator } from 'react-native';
+import { Button, StyleSheet, Text, TouchableOpacity, View, Image, ActivityIndicator, Clipboard } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import * as React from "react";
 import ImageDisplayScreen from './ImageDisplayScreen'; // Import the new screen
@@ -9,6 +9,7 @@ import ProcessedImagesScreen from './ProcessedImagesScreen';
 import ResultScreen from './ResultScreen';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { generateAiOverlay } from './AiApiHandler';
+import Slider from '@react-native-community/slider';
 
 const Stack = createStackNavigator();
 
@@ -22,6 +23,7 @@ function CameraScreen({ navigation }) {
   const [imageCount, setImageCount] = React.useState(0);
   const [loading, setLoading] = React.useState(false);
   const [overlayImageUrl, setOverlayImageUrl] = React.useState(null);
+  const [overlayOpacity, setOverlayOpacity] = React.useState(1); // State to control overlay opacity
 
   React.useEffect(() => {
     (async () => {
@@ -64,7 +66,11 @@ function CameraScreen({ navigation }) {
 
   const renderOverlayImage = () => {
     if (overlayImageUrl) {
-      return <Image source={{ uri: overlayImageUrl }} style={styles.overlayImage} />;
+      return <Image
+        source={{ uri: overlayImageUrl }} 
+        style={[styles.overlayImage, { opacity: overlayOpacity }]}  
+        resizeMode="contain" // 使用 contain 確保圖片按原始比例縮放
+      />;
     }
     return <Image style={styles.emptyOverlayImage} />; // 返回一个空的 Image 组件;
   };
@@ -91,6 +97,7 @@ function CameraScreen({ navigation }) {
       
       // Call generateAiOverlay with the photo URI
       const imageUrl = await generateAiOverlay(photo.uri);
+      Clipboard.setString(imageUrl);
       setOverlayImageUrl(imageUrl);
   
       setLoading(false);
@@ -117,6 +124,18 @@ function CameraScreen({ navigation }) {
       </CameraView>
       {loading && <ActivityIndicator size="large" color="#007AFF" style={styles.loadingIndicator}/>}
       <Text style={styles.imageCountText}>{imageCount} / 3</Text>
+      <View style={styles.sliderContainer}>
+        <Text style={styles.sliderLabel}>Overlay Opacity</Text>
+        <Slider
+          style={styles.slider}
+          minimumValue={0}
+          maximumValue={1}
+          value={overlayOpacity}
+          onValueChange={setOverlayOpacity}
+          minimumTrackTintColor="#007AFF"
+          maximumTrackTintColor="#000000"
+        />
+      </View>
     </View>
   );
 }
@@ -144,8 +163,8 @@ const styles = StyleSheet.create({
   },
   overlayImage: {
     position: 'absolute',
-    // top: '-25%',
-    // left: '-25%',
+    // top: '25%',
+    // left: '25%',
     width: '100%',
     height: '100%',
   },
@@ -193,5 +212,25 @@ const styles = StyleSheet.create({
     top: '50%',
     left: '50%',
     transform: [{ translateX: -50 }, { translateY: -50 }],
+  },
+  sliderContainer: {
+    position: 'absolute',
+    top: '50%',
+    right: 20,
+    transform: [{ rotate: '-90deg' }, { translateY: -150 }], // Rotate and position the slider
+    width: 300, // Adjust the width to fit the screen
+    height: 40,
+    justifyContent: 'center',
+  },
+  sliderLabel: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'white',
+    marginBottom: 10,
+    // transform: [{ rotate: '90deg' }], // Rotate the label back to normal
+  },
+  slider: {
+    width: '100%',
+    height: 40,
   },
 });
