@@ -4,13 +4,16 @@ import { generateAiCaption } from './AiApiHandler';
 
 export default function ProcessedImagesScreen({ route, navigation }) {
   const { processedUrls } = route.params;
+  const [storeName, setStoreName] = useState('');
+  const [items, setItems] = useState('');
+  const [review, setReview] = useState('');
   const [aiText, setAiText] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleAiText = async () => {
     setLoading(true);
     // Simulate generating AI text using OpenAI API
-    const generatedText = await generateAiCaption(aiText);
+    const generatedText = await generateAiCaption(storeName, items, review);
     setAiText(generatedText);
     setLoading(false);
     console.log('AI 文案 button pressed');
@@ -31,15 +34,30 @@ export default function ProcessedImagesScreen({ route, navigation }) {
       ))}
       <TextInput
         style={styles.input}
-        placeholder="輸入簡短文案"
-        value={aiText}
-        onChangeText={setAiText} // Update state on text change
+        placeholder="輸入店名"
+        value={storeName}
+        onChangeText={setStoreName} // Update state on text change
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="輸入商品"
+        value={items}
+        onChangeText={setItems} // Update state on text change
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="輸入評論"
+        value={review}
+        onChangeText={setReview} // Update state on text change
       />
       <View style={styles.buttonContainer}>
         {loading && <ActivityIndicator size="small" color="#007AFF" style={styles.loadingIndicator} />}
         <TouchableOpacity style={styles.button} onPress={handleAiText} disabled={loading}>
           <Text style={styles.buttonText}>AI 文案</Text>
         </TouchableOpacity>
+      </View>
+      <View style={styles.aiTextBox}>
+        <Text style={styles.aiText}>{aiText || 'AI 文案將顯示在這裡'}</Text>
       </View>
       <TouchableOpacity style={styles.button} onPress={handleNextStep}>
         <Text style={styles.buttonText}>下一步</Text>
@@ -94,5 +112,17 @@ const styles = StyleSheet.create({
   },
   loadingIndicator: {
     marginRight: 10,
+  },
+  aiTextBox: {
+    width: '80%',
+    padding: 10,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginTop: 20,
+    backgroundColor: '#f0f0f0',
+  },
+  aiText: {
+    fontSize: 16,
+    color: 'black',
   },
 });

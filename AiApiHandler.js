@@ -189,9 +189,9 @@ export const generateAiProcessedImage = async (imageUrls) => {
   return processedImageUrls; // Return the list of processed image URLs
 };
 
-export const generateAiCaption = async (text) => { // it can be called generateAiCaption
+export const generateAiCaption = async (storeName, items, review) => {
   // Function to get caption from the backend
-  const getCaptionFromBackend = async (text) => {
+  const getCaptionFromBackend = async (storeName, items, review) => {
     try {
       const response = await fetch(`${backend_root}/get_caption`, {
         method: 'POST',
@@ -199,7 +199,7 @@ export const generateAiCaption = async (text) => { // it can be called generateA
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: JSON.stringify({ text: text })
+        body: JSON.stringify({ storeName, items, review })
       });
       const responseData = await response.json();
       console.log('Caption from server:', responseData);
@@ -211,5 +211,5 @@ export const generateAiCaption = async (text) => { // it can be called generateA
     }
   }
 
-  return getCaptionFromBackend(text); // Get the caption from the server
+  return getCaptionFromBackend(storeName, items, review); // Get the caption from the server
 };
