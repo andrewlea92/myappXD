@@ -1,7 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Camera, CameraView, useCameraPermissions } from 'expo-camera';
-import { Button, StyleSheet, Text, TouchableOpacity, View, Image, ActivityIndicator, Clipboard } from 'react-native';
+import { Button, StyleSheet, Text, TouchableOpacity, View, Image, ActivityIndicator, Clipboard, TextInput } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import * as React from "react";
 import ImageDisplayScreen from './ImageDisplayScreen'; // Import the new screen
@@ -24,6 +24,7 @@ function CameraScreen({ navigation }) {
   const [loading, setLoading] = React.useState(false);
   const [overlayImageUrl, setOverlayImageUrl] = React.useState(null);
   const [overlayOpacity, setOverlayOpacity] = React.useState(1); // State to control overlay opacity
+  const [foodInput, setFoodInput] = React.useState(''); // State to manage food input
 
   React.useEffect(() => {
     (async () => {
@@ -96,7 +97,7 @@ function CameraScreen({ navigation }) {
       const photo = await cameraRef.current.takePictureAsync();
       
       // Call generateAiOverlay with the photo URI
-      const imageUrl = await generateAiOverlay(photo.uri);
+      const imageUrl = await generateAiOverlay(photo.uri, foodInput);
       Clipboard.setString(imageUrl);
       setOverlayImageUrl(imageUrl);
   
@@ -136,6 +137,12 @@ function CameraScreen({ navigation }) {
           maximumTrackTintColor="#000000"
         />
       </View>
+      <TextInput
+        style={styles.foodInput}
+        placeholder="你吃的是..."
+        value={foodInput}
+        onChangeText={setFoodInput}
+      />
     </View>
   );
 }
@@ -232,5 +239,16 @@ const styles = StyleSheet.create({
   slider: {
     width: '100%',
     height: 40,
+  },
+  foodInput: {
+    position: 'absolute',
+    bottom: 20,
+    left: 20,
+    right: 20,
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    backgroundColor: 'white',
   },
 });

@@ -2,7 +2,7 @@ const nthu_drom_backend = 'http://192.168.0.104:5000';
 const my_home_backend = 'http://192.168.50.74:5000';
 const backend_root = nthu_drom_backend;
 
-export const generateAiOverlay = async (imageUri) => {
+export const generateAiOverlay = async (imageUri, category) => {
   // Function to upload the image to the backend
   const uploadImageToBackend = async (imageUri) => {
     const timestamp = Date.now(); // Get current timestamp
@@ -65,7 +65,7 @@ export const generateAiOverlay = async (imageUri) => {
   };
 
   // Function to get the overlay image from the backend
-  const getOverlayImageFromBackend = async (filePath) => {
+  const getOverlayImageFromBackend = async (filePath, category) => {
     try {
       const response = await fetch(`${backend_root}/get_overlay_image`, {
         method: 'POST',
@@ -73,7 +73,7 @@ export const generateAiOverlay = async (imageUri) => {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: JSON.stringify({ file_path: filePath })
+        body: JSON.stringify({ file_path: filePath, category: category })
       });
       const blob = await response.blob();
       const base64Image = await blobToBase64(blob); // Convert Blob to Base64
@@ -87,8 +87,8 @@ export const generateAiOverlay = async (imageUri) => {
   };
 
   // for testing straight to get overlay image
-  const filePath_test = imageUri;
-  const overlayImageUrl = await getOverlayImageFromBackend(filePath_test); // Get the overlay image from the server
+  const filePath_test = await uploadImageToBackend(imageUri);;
+  const overlayImageUrl = await getOverlayImageFromBackend(filePath_test, category); // Get the overlay image from the server
   return overlayImageUrl; // Return the overlay image
 
   // Upload the image first
