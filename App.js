@@ -22,7 +22,8 @@ function CameraScreen({ navigation }) {
   const [imageUrls, setImageUrls] = React.useState([]);
   const [imageCount, setImageCount] = React.useState(0);
   const [loading, setLoading] = React.useState(false);
-  const [overlayImageUrl, setOverlayImageUrl] = React.useState(null);
+  const [overlayImages, setOverlayImages] = React.useState([]);
+  const [shownOverlayImageIdx, setShownOverlayImageIdx] = React.useState(0); // State to manage the shown overlay image index
   const [overlayOpacity, setOverlayOpacity] = React.useState(1); // State to control overlay opacity
   const [foodInput, setFoodInput] = React.useState(''); // State to manage food input
 
@@ -65,10 +66,27 @@ function CameraScreen({ navigation }) {
     );
   }
 
-  const renderOverlayImage = () => {
-    if (overlayImageUrl) {
+  const cycleOverlayImage = () => {
+    if (overlayImages.length > 0) {
+      setShownOverlayImageIdx((prevIdx) => (prevIdx + 1) % overlayImages.length);
+    }
+  }
+
+  const renderOverlayImages = () => {
+    if (overlayImages.length > 0 && shownOverlayImageIdx < overlayImages.length) {
+      return (
+          <Image
+            source={overlayImages[shownOverlayImageIdx]}
+            style={[styles.overlayImage, { opacity: overlayOpacity }]}
+            resizeMode="contain" // Ensure the image scales proportionally
+          />
+      );
+    }
+    return <Image style={styles.emptyOverlayImage} />; // Return an empty Image component if no overlay image is available
+  
+    if (overlayImage) {
       return <Image
-        source={{ uri: overlayImageUrl }} 
+        source={overlayImage} 
         style={[styles.overlayImage, { opacity: overlayOpacity }]}  
         resizeMode="contain" // 使用 contain 確保圖片按原始比例縮放
       />;
@@ -97,9 +115,9 @@ function CameraScreen({ navigation }) {
       const photo = await cameraRef.current.takePictureAsync();
       
       // Call generateAiOverlay with the photo URI
-      const imageUrl = await generateAiOverlay(photo.uri, foodInput);
-      Clipboard.setString(imageUrl);
-      setOverlayImageUrl(imageUrl);
+      const overlayImages = await generateAiOverlay(photo.uri, foodInput);
+
+      setOverlayImages(overlayImages); // Set the overlay image to the first image in the array
   
       setLoading(false);
       console.log('AI 覆蓋 button pressed');
@@ -121,7 +139,7 @@ function CameraScreen({ navigation }) {
             <Text style={styles.text}>AI 框線提示</Text>
           </TouchableOpacity>
         </View>
-        {renderOverlayImage()}
+        {renderOverlayImages()}
       </CameraView>
       {loading && <ActivityIndicator size="large" color="#007AFF" style={styles.loadingIndicator}/>}
       <Text style={styles.imageCountText}>{imageCount} / 3</Text>
@@ -143,6 +161,9 @@ function CameraScreen({ navigation }) {
         value={foodInput}
         onChangeText={setFoodInput}
       />
+      <TouchableOpacity style={styles.nextOverlayButton} onPress={cycleOverlayImage}>
+        <Text style={styles.text}>Next Overlay Image</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -209,7 +230,7 @@ const styles = StyleSheet.create({
   imageCountText: {
     position: 'absolute',
     top: 10,
-    right: 10,
+    left: 10,
     fontSize: 36,
     fontWeight: 'bold',
     color: 'white',
@@ -250,5 +271,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: 10,
     backgroundColor: 'white',
+  },
+  nextOverlayButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    padding: 10,
+    backgroundColor: '#007AFF',
+    borderRadius: 5,
   },
 });

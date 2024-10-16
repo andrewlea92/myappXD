@@ -75,10 +75,10 @@ export const generateAiOverlay = async (imageUri, category) => {
         },
         body: JSON.stringify({ file_path: filePath, category: category })
       });
-      const blob = await response.blob();
-      const base64Image = await blobToBase64(blob); // Convert Blob to Base64
-      console.log('Overlay image from server:', base64Image.substring(0, 100));
-      return `data:image/jpeg;base64,${base64Image}`; // Return Base64 data Url
+      const data = await response.json();
+      const overlayImageFilePaths = data.overlay_image_file_paths;
+      console.log('Overlay images from server:', overlayImageFilePaths);
+      return overlayImageFilePaths; // Return array of file paths
     }
     catch (error) {
       console.error('Error getting overlay image:', error);
@@ -86,31 +86,37 @@ export const generateAiOverlay = async (imageUri, category) => {
     }
   };
 
-  // for testing straight to get overlay image
-  const filePath_test = await uploadImageToBackend(imageUri);;
-  const overlayImageUrl = await getOverlayImageFromBackend(filePath_test, category); // Get the overlay image from the server
-  return overlayImageUrl; // Return the overlay image
+  const filePath = await uploadImageToBackend(imageUri); // Upload the image to the backend
 
-  // Upload the image first
-  const filePath = await uploadImageToBackend(imageUri); // Upload the captured image and get the file path
+  const overlayImageFilePaths = await getOverlayImageFromBackend(filePath, category); // Get the overlay image from the server
+  
+  const imageMapping = {
+    './assets/ig/拉麵_1.jpg': require('./assets/ig/拉麵_1.jpg'),
+    './assets/ig/拉麵_2.jpg': require('./assets/ig/拉麵_2.jpg'),
+    './assets/ig/拉麵_3.jpg': require('./assets/ig/拉麵_3.jpg'),
+    './assets/ig/火鍋_1.jpg': require('./assets/ig/火鍋_1.jpg'),
+    './assets/ig/火鍋_2.jpg': require('./assets/ig/火鍋_2.jpg'),
+    './assets/ig/火鍋_3.jpg': require('./assets/ig/火鍋_3.jpg'),
+    './assets/ig/燒肉_1.jpg': require('./assets/ig/燒肉_1.jpg'),
+    './assets/ig/燒肉_2.jpg': require('./assets/ig/燒肉_2.jpg'),
+    './assets/ig/燒肉_3.jpg': require('./assets/ig/燒肉_3.jpg'),
+    './assets/ig/甜點_1.jpg': require('./assets/ig/甜點_1.jpg'),
+    './assets/ig/甜點_2.jpg': require('./assets/ig/甜點_2.jpg'),
+    './assets/ig/甜點_3.jpg': require('./assets/ig/甜點_3.jpg'),
+    './assets/ig/甜點_4.jpg': require('./assets/ig/甜點_4.jpg'),
+    './assets/ig/甜點_5.jpg': require('./assets/ig/甜點_5.jpg'),
+    './assets/ig/甜點_6.jpg': require('./assets/ig/甜點_6.jpg'),
+    './assets/ig/甜點_7.jpg': require('./assets/ig/甜點_7.jpg'),
+    './assets/ig/甜點_8.jpg': require('./assets/ig/甜點_8.jpg'),
+    './assets/ig/甜點_9.jpg': require('./assets/ig/甜點_9.jpg'),
+    './assets/ig/西餐_1.jpg': require('./assets/ig/西餐_1.jpg'),
+    './assets/ig/西餐_2.jpg': require('./assets/ig/西餐_2.jpg'),
+    './assets/ig/西餐_3.jpg': require('./assets/ig/西餐_3.jpg'),
+  };
 
-  // Get the overlay number from the server
-  const overlayNumber = await getOverlayNumberFromBackend(filePath); // Get the overlay number from the server
+  const selectedOverlayImages = overlayImageFilePaths.map((overlayImageFilePath) => imageMapping[overlayImageFilePath]);
 
-  // Load the corresponding image based on the overlay number
-  const overlayImages = [
-    require('./assets/milk/1.png'),
-    require('./assets/milk/2.png'),
-    require('./assets/milk/3.png'),
-    require('./assets/milk/4.png'),
-    require('./assets/milk/5.png'),
-    require('./assets/milk/6.png'),
-    require('./assets/milk/7.png'),
-  ];
-  const selectedOverlayImage = overlayImages[(overlayNumber - 1) % overlayImages.length]; // Select the image based on the number
-  // overlayNumber is 1-based index
-
-  return selectedOverlayImage; // Return the selected overlay image
+  return selectedOverlayImages; // Return the selected overlay images
 };
 
 export const generateAiProcessedImage = async (imageUrls) => {
