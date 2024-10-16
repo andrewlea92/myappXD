@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Image, StyleSheet, TextInput, ScrollView, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { generateAiCaption } from './AiApiHandler';
+import { generateAiCaption, generateAiCaptionWithAudio } from './AiApiHandler';
+import { Audio } from 'expo-av';
 
 export default function ProcessedImagesScreen({ route, navigation }) {
   const { processedUrls } = route.params;
@@ -9,6 +10,9 @@ export default function ProcessedImagesScreen({ route, navigation }) {
   const [review, setReview] = useState('');
   const [aiText, setAiText] = useState('');
   const [loading, setLoading] = useState(false);
+  const [recording, setRecording] = useState();
+  const [recordedUrl, setRecordedUrl] = useState();
+  const [permissionResponse, requestPermission] = Audio.usePermissions();
 
   const handleAiText = async () => {
     setLoading(true);
@@ -25,6 +29,60 @@ export default function ProcessedImagesScreen({ route, navigation }) {
     console.log('下一步 button pressed');
   };
 
+  async function startRecording() {
+    try {
+      if (permissionResponse.status !== 'granted') {
+        console.log('Requesting permission..');
+        await requestPermission();
+      }
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+
+      console.log('Starting recording..');
+      const { recording } = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
+      setRecording(recording);
+      console.log('Recording started');
+    } catch (err) {
+      console.error('Failed to start recording', err);
+    }
+  }
+
+  async function stopRecording() {
+    console.log('Stopping recording..');
+    setRecording(undefined);
+    await recording.stopAndUnloadAsync();
+    await Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+    });
+    const uri = recording.getURI();
+    console.log('Recording stopped and stored at', uri);
+    setRecordedUrl(uri);
+    // Play the recorded audio
+    const { sound } = await Audio.Sound.createAsync({ uri });
+    await sound.playAsync();
+  }
+
+  async function replayRecording() {
+    if (recordedUrl) {
+      const uri = recordedUrl;
+      const { sound } = await Audio.Sound.createAsync({ uri });
+      await sound.playAsync();
+    } else {
+      console.log('No recording available to replay');
+    }
+  }
+
+  const handleAiText2 = async () => {
+    setLoading(true);
+    // Simulate generating AI text using OpenAI API
+    const generatedText = await generateAiCaptionWithAudio(recordedUrl);
+    setAiText(generatedText);
+    setLoading(false);
+    console.log('AI 文案2 button pressed');
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {processedUrls.map((url, index) => (
@@ -32,6 +90,15 @@ export default function ProcessedImagesScreen({ route, navigation }) {
           <Image source={{ uri: url }} style={styles.image} />
         </View>
       ))}
+      <TouchableOpacity style={styles.button} onPress={recording ? stopRecording : startRecording}>
+        <Text style={styles.buttonText}>{recording ? 'Stop Recording' : 'Start Recording'}</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.button} onPress={replayRecording}>
+        <Text style={styles.buttonText}>重新聽錄音</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.button} onPress={handleAiText2}>
+        <Text style={styles.buttonText}>AI 文案with錄音</Text>
+      </TouchableOpacity>
       <TextInput
         style={styles.input}
         placeholder="輸入店名"
