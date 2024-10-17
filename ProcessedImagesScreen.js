@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { View, Image, StyleSheet, TextInput, ScrollView, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { generateAiCaption, generateAiCaptionWithAudio } from './AiApiHandler';
+import { debugCaption, debugCaptionWithAudio, debugMode } from './DebugApiHandler';
 import { Audio } from 'expo-av';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 export default function ProcessedImagesScreen({ route, navigation }) {
   const { processedUrls } = route.params;
@@ -13,18 +15,24 @@ export default function ProcessedImagesScreen({ route, navigation }) {
   const [recording, setRecording] = useState();
   const [recordedUrl, setRecordedUrl] = useState();
   const [permissionResponse, requestPermission] = Audio.usePermissions();
+  const [isRecordingMode, setIsRecordingMode] = useState(false); // 新增狀態來控制錄音或手動輸入
 
-  const handleAiText = async () => {
+  const handleAiTextWithHint = async () => {
     setLoading(true);
-    // Simulate generating AI text using OpenAI API
-    const generatedText = await generateAiCaption(storeName, items, review);
+
+    let generatedText;
+    if (debugMode) {
+      generatedText = await debugCaption(storeName, items, review);
+    } else {
+      generatedText = await generateAiCaption(storeName, items, review);
+    }
+
     setAiText(generatedText);
     setLoading(false);
     console.log('AI 文案 button pressed');
   };
 
   const handleNextStep = () => {
-    // Navigate to the Result screen
     navigation.navigate('Result', { processedUrls, aiText });
     console.log('下一步 button pressed');
   };
@@ -59,7 +67,6 @@ export default function ProcessedImagesScreen({ route, navigation }) {
     const uri = recording.getURI();
     console.log('Recording stopped and stored at', uri);
     setRecordedUrl(uri);
-    // Play the recorded audio
     const { sound } = await Audio.Sound.createAsync({ uri });
     await sound.playAsync();
   }
@@ -74,10 +81,15 @@ export default function ProcessedImagesScreen({ route, navigation }) {
     }
   }
 
-  const handleAiText2 = async () => {
+  const handleAiTextWithAudio = async () => {
     setLoading(true);
-    // Simulate generating AI text using OpenAI API
-    const generatedText = await generateAiCaptionWithAudio(recordedUrl);
+    let generatedText;
+    if (debugMode) {
+      generatedText = await debugCaptionWithAudio(recordedUrl);
+    } else {
+      generatedText = await generateAiCaptionWithAudio(recordedUrl);
+    }
+
     setAiText(generatedText);
     setLoading(false);
     console.log('AI 文案2 button pressed');
@@ -90,39 +102,62 @@ export default function ProcessedImagesScreen({ route, navigation }) {
           <Image source={{ uri: url }} style={styles.image} />
         </View>
       ))}
-      <TouchableOpacity style={styles.button} onPress={recording ? stopRecording : startRecording}>
-        <Text style={styles.buttonText}>{recording ? 'Stop Recording' : 'Start Recording'}</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={replayRecording}>
-        <Text style={styles.buttonText}>重新聽錄音</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={handleAiText2}>
-        <Text style={styles.buttonText}>AI 文案with錄音</Text>
-      </TouchableOpacity>
-      <TextInput
-        style={styles.input}
-        placeholder="輸入店名"
-        value={storeName}
-        onChangeText={setStoreName} // Update state on text change
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="輸入商品"
-        value={items}
-        onChangeText={setItems} // Update state on text change
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="輸入評論"
-        value={review}
-        onChangeText={setReview} // Update state on text change
-      />
+      
+      {/* 新增選擇模式的按鈕 */}
       <View style={styles.buttonContainer}>
-        {loading && <ActivityIndicator size="small" color="#007AFF" style={styles.loadingIndicator} />}
-        <TouchableOpacity style={styles.button} onPress={handleAiText} disabled={loading}>
-          <Text style={styles.buttonText}>AI 文案</Text>
-        </TouchableOpacity>
+      <TouchableOpacity style={[styles.button, styles.buttonMargin]} onPress={() => setIsRecordingMode(true)}>
+        <Text style={styles.buttonText}>錄音</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={[styles.button, styles.buttonMargin]} onPress={() => setIsRecordingMode(false)}>
+        <Text style={styles.buttonText}>手動輸入</Text>
+      </TouchableOpacity>
       </View>
+
+      {isRecordingMode ? (
+        // 錄音模式的按鈕
+        <>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.circleButton} onPress={recording ? stopRecording : startRecording}>
+              <Icon name={recording ? 'stop' : 'microphone'} size={30} color={recording ? 'red' : 'green'} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.circleButton} onPress={replayRecording}>
+              <Icon name="repeat" size={30} color="white"/>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity style={styles.button} onPress={handleAiTextWithAudio}>
+            <Text style={styles.buttonText}>錄音檔生成 AI 文案</Text>
+          </TouchableOpacity>
+        </>
+      ) : (
+        // 手動輸入模式的輸入框
+        <>
+          <TextInput
+            style={styles.input}
+            placeholder="輸入店名"
+            value={storeName}
+            onChangeText={setStoreName}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="輸入商品"
+            value={items}
+            onChangeText={setItems}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="輸入評論"
+            value={review}
+            onChangeText={setReview}
+          />
+          <View style={styles.buttonContainer}>
+            {loading && <ActivityIndicator size="small" color="#007AFF" style={styles.loadingIndicator} />}
+            <TouchableOpacity style={styles.button} onPress={handleAiTextWithHint} disabled={loading}>
+              <Text style={styles.buttonText}>生成 AI 文案</Text>
+            </TouchableOpacity>
+          </View>
+        </>
+      )}
+
       <View style={styles.aiTextBox}>
         <Text style={styles.aiText}>{aiText || 'AI 文案將顯示在這裡'}</Text>
       </View>
@@ -164,6 +199,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between', // 可選：讓按鈕平均分佈
     marginTop: 20,
   },
   button: {
@@ -176,6 +212,19 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  buttonMargin: {
+    marginHorizontal: 10, // 調整此值以增加按鈕之間的水平間距
+  },
+  circleButton: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: 'black',
+    justifyContent: 'center',
+    alignSelf: 'flex-end',
+    alignItems: 'center',
+    marginHorizontal: 10,
   },
   loadingIndicator: {
     marginRight: 10,

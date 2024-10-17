@@ -52,5 +52,7 @@ npx expo start
 npm install expo-camera expo-media-library
 npm install @react-navigation/native @react-navigation/stack
 npm install react-native-screens react-native-safe-area-context
+npm install react-native-gesture-handler react-native-reanimated
 
+# ask ma's packagejson and feed to chatgpt to npm install everything
 ```

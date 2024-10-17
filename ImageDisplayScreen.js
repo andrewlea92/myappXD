@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Image, StyleSheet, TouchableOpacity, Text, ScrollView } from 'react-native';
 import { generateAiProcessedImage } from './AiApiHandler';
+import { debugProcessedImage ,debugMode } from './DebugApiHandler';
 
 export default function ImageDisplayScreen({ route, navigation }) {
   const { imageUrls } = route.params;
@@ -9,8 +10,16 @@ export default function ImageDisplayScreen({ route, navigation }) {
   const [showAlert, setShowAlert] = useState(false); // Add state for alert
 
   const handleAiEdit = async () => {
+    let processed = [];
     // Simulate uploading images to an external API and receiving processed images
-    const processed = await generateAiProcessedImage(imageUrls);
+    if (debugMode) {
+      processed = await debugProcessedImage(imageUrls);
+      console.log('Processed URLs:', processed);
+    }
+    else
+    {
+      processed = await generateAiProcessedImage(imageUrls);
+    }
     setProcessedUrls(processed);
     setShowNextButton(true);
     setShowAlert(true); // Show alert

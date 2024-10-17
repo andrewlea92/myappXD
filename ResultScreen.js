@@ -4,23 +4,30 @@ import * as MediaLibrary from 'expo-media-library';
 import * as FileSystem from 'expo-file-system';
 // import Clipboard from '@react-native-clipboard/clipboard';
 import { LogBox } from 'react-native';
+import { debugMode } from './DebugApiHandler';
 LogBox.ignoreAllLogs(); // for suppressing clipboard warning
 
 // Function to save Base64 image to Media Library
 const saveImageToMediaLibrary = async (base64DataUrl) => {
-  // Extract the Base64 string from the data URL
-  const base64Image = base64DataUrl.split(',')[1];
-  const fileName = `photo_${Date.now()}.jpg`;
-  const fileUri = `${FileSystem.documentDirectory}${fileName}`;
+  let fileUri;
+  if (debugMode) {
+    fileUri = base64DataUrl;
+  } else {
+    fileUri = `${FileSystem.documentDirectory}photo_${Date.now()}.jpg`;
 
-  // Write the Base64 image to a file
-  await FileSystem.writeAsStringAsync(fileUri, base64Image, {
-    encoding: FileSystem.EncodingType.Base64,
-  });
+    // Extract the Base64 string from the data URL
+    const base64Image = base64DataUrl.split(',')[1];
+
+    // Write the Base64 image to a file
+    await FileSystem.writeAsStringAsync(fileUri, base64Image, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+  }
 
   // Save the file to the media library
   const asset = await MediaLibrary.createAssetAsync(fileUri);
   // await MediaLibrary.createAlbumAsync('FoodgramAI', asset, false);
+  console.log('Saved to:', fileUri);
 
   return fileUri;
 };
@@ -36,6 +43,7 @@ export default function ResultScreen({ route }) {
       Alert.alert('已成功儲存至手機');
     } catch (error) {
       Alert.alert('儲存至手機失敗');
+      console.error(error);
     }
   };
 

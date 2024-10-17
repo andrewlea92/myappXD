@@ -35,36 +35,6 @@ export const generateAiOverlay = async (imageUri, category) => {
     }
   };
 
-  // Function to get the overlay number from the backend
-  const getOverlayNumberFromBackend = async (filePath) => {
-    try {
-      const response = await fetch(`${backend_root}/get_overlay_number`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify({ file_path: filePath })
-      });
-      const responseData = await response.json();
-      console.log('Overlay number from server:', responseData);
-      return responseData.number; // Assuming the number is in responseData.number
-    } catch (error) {
-      console.error('Error getting overlay number:', error);
-      throw error; // Re-throw error to handle it in the calling function
-    }
-  };
-
-  // Helper function to convert Blob to Base64
-  const blobToBase64 = (blob) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result.split(',')[1]);
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-  };
-
   // Function to get the overlay image from the backend
   const getOverlayImageFromBackend = async (filePath, category) => {
     try {
