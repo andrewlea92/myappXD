@@ -11,6 +11,7 @@ LogBox.ignoreAllLogs(); // for suppressing clipboard warning
 const saveImageToMediaLibrary = async (base64DataUrl) => {
   let fileUri;
   if (debugMode) {
+    console.log(base64DataUrl);
     fileUri = base64DataUrl;
   } else {
     fileUri = `${FileSystem.documentDirectory}photo_${Date.now()}.jpg`;

@@ -1,7 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Camera, CameraView, useCameraPermissions } from 'expo-camera';
-import { Button, StyleSheet, Text, TouchableOpacity, View, Image, ActivityIndicator, Clipboard, TextInput, Modal , ScrollView} from 'react-native';
+import { Button, StyleSheet, Text, TouchableOpacity, View, Image, ActivityIndicator, Clipboard, TextInput, Modal , ScrollView, Dimensions } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import * as React from "react";
 import ImageDisplayScreen from './ImageDisplayScreen'; // Import the new screen
@@ -12,9 +12,14 @@ import { generateAiOverlay } from './AiApiHandler';
 import { debugOverlay , debugMode } from './DebugApiHandler';
 import Slider from '@react-native-community/slider';
 import { PanGestureHandler } from 'react-native-gesture-handler';
+import * as ImageManipulator from 'expo-image-manipulator';
+
 
 
 const Stack = createStackNavigator();
+const { width, height } = Dimensions.get('window');
+const aspectRatio = width / height; // 獲取設備的寬高比
+const squareSize = height * (1 / aspectRatio); // 設定為 y*y
 
 function CameraScreen({ navigation }) {
   const [facing, setFacing] = React.useState('back');
@@ -128,14 +133,43 @@ function CameraScreen({ navigation }) {
 
   const takePicture = async () => {
     if (cameraRef.current) {
-      setTimeout(() => setLoading(true), 250); // Show after blinking effect with delay
-      const photo = await cameraRef.current.takePictureAsync();
-      setImageCount(imageCount + 1);
-      const asset = photo;
-      setImageUrls([...imageUrls, asset.uri]);
-      setLoading(false);
+      setLoading(true); // 立即顯示 loading
+      try {
+        const photo = await cameraRef.current.takePictureAsync();
+        const squareSize = photo.width; // 使用拍攝的照片寬度作為裁剪大小
+        const { uri, width, height } = photo;
+  
+        // 計算裁剪的起始點，確保不超出邊界
+        const originX = Math.max(0, (width - squareSize) / 2);
+        const originY = Math.max(0, (height - squareSize) / 2);
+  
+        // 使用 ImageManipulator 進行裁剪
+        const croppedImage = await ImageManipulator.manipulateAsync(
+          uri,
+          [
+            {
+              crop: {
+                originX: originX,
+                originY: originY,
+                width: squareSize,  // 確保寬度設置為正中間裁剪區域的大小
+                height: squareSize, // 確保高度設置為正中間裁剪區域的大小
+              },
+            },
+          ],
+          { compress: 1, format: ImageManipulator.SaveFormat.JPEG }
+        );
+        setImageCount(imageCount + 1);
+        setImageUrls([...imageUrls, croppedImage.uri]);
+      } catch (error) {
+        console.error("拍照或裁剪過程中出現錯誤:", error);
+      } finally {
+        setLoading(false); // 確保 loading 被隱藏
+      }
     }
   };
+  
+  
+  
 
   const handleAiOverlay = async () => {
     if (cameraRef.current) {
@@ -164,39 +198,57 @@ function CameraScreen({ navigation }) {
     <View style={styles.container}>
       <PanGestureHandler onGestureEvent={handleGesture}>
         <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.circleButton} onPress={toggleCameraFacing}>
-              <Icon name="refresh" size={30} color="white" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.circleButton} onPress={takePicture} disabled={loading}>
-              <Icon name="camera" size={30} color="white" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.circleButton} onPress={handleAiOverlay} disabled={loading}>
-              <Icon name="magic" size={30} color="white" />
-            </TouchableOpacity>
+
+          {/* 上方灰階遮罩 */}
+          <View style={styles.overlay} >
+            {/* 放置在上方灰階遮罩中的元素 */}
+            <View style={styles.buttonContainer}>
+              <Text style={styles.imageCountText}>{imageCount} / 3</Text>
+              <TouchableOpacity style={styles.openModalButton} onPress={openModal}>
+                <Icon name="lightbulb-o" size={30} color="white"/>
+              </TouchableOpacity>
+            </View>
           </View>
-          {renderOverlayImages()}
+
+          {/* 中間正方形可視區域 */}
+          <View style={styles.squareFocusArea}>
+            {renderOverlayImages()}
+            {/* 底部的滑動條 */}
+            <View style={styles.sliderContainer}>
+              <Text style={styles.sliderLabel}>Overlay Opacity</Text>
+              <Slider
+                style={styles.slider}
+                minimumValue={0}
+                maximumValue={1}
+                value={overlayOpacity}
+                onValueChange={setOverlayOpacity}
+                minimumTrackTintColor="#000"
+                maximumTrackTintColor="#ccc" 
+                thumbTintColor="#fff" 
+              />
+            </View>
+          </View>
+
+          {/* 下方灰階遮罩 */}
+          <View style={styles.overlay}>
+            {/* 放置在下方灰階遮罩中的按鈕 */}
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity style={styles.circleButton} onPress={toggleCameraFacing}>
+                <Icon name="refresh" size={30} color="white" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.circleButton} onPress={takePicture} disabled={loading}>
+                <Icon name="camera" size={30} color="white" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.circleButton} onPress={handleAiOverlay} disabled={loading}>
+                <Icon name="magic" size={30} color="white" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
         </CameraView>
       </PanGestureHandler>
-      {loading && <ActivityIndicator size="large" color="#007AFF" style={styles.loadingIndicator}/>}
-      <Text style={styles.imageCountText}>{imageCount} / 3</Text>
-      <View style={styles.sliderContainer}>
-        <Text style={styles.sliderLabel}>Overlay Opacity</Text>
-        <Slider
-          style={styles.slider}
-          minimumValue={0}
-          maximumValue={1}
-          value={overlayOpacity}
-          onValueChange={setOverlayOpacity}
-          minimumTrackTintColor="#007AFF"
-          maximumTrackTintColor="#ccc" 
-          thumbTintColor="#fff" 
-        />
-      </View>
-      {/* 新增按鈕來打開彈窗 */}
-      <TouchableOpacity style={styles.openModalButton} onPress={openModal}>
-        <Icon name="lightbulb-o" size={30} color="white"/>
-      </TouchableOpacity>
+
+      {loading && <ActivityIndicator size="large" color="#000" style={styles.loadingIndicator}/>}
 
       {/* 彈出式視窗 */}
       <Modal
@@ -220,6 +272,7 @@ function CameraScreen({ navigation }) {
           </View>
         </View>
       </Modal>
+
     </View>
   );
 }
@@ -227,8 +280,15 @@ function CameraScreen({ navigation }) {
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Camera">
-        <Stack.Screen name="Camera" component={CameraScreen} />
+      <Stack.Navigator
+        initialRouteName="Camera"
+        screenOptions={{
+          headerStyle: { backgroundColor: '#000' }, // 設置標題欄背景顏色
+          headerTintColor: '#fff', // 設置標題文字顏色
+          headerTitleStyle: { fontWeight: 'bold' }, // 設置標題文字樣式
+        }}
+      >
+        <Stack.Screen name="Camera" component={CameraScreen} options={{ headerShown: false }}/>
         <Stack.Screen name="ImageDisplay" component={ImageDisplayScreen} />
         <Stack.Screen name="ProcessedImages" component={ProcessedImagesScreen} />
         <Stack.Screen name="Result" component={ResultScreen} />
@@ -249,11 +309,29 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: '100%',
     height: '100%',
+    top: 0,
+    left: 0,
+    // justifyContent: 'center',
+    // alignItems: 'center',
   },
   emptyOverlayImage: {
     width: 0,
     height: 0,
     opacity: 0,
+  },
+  overlay: {
+    width: '100%',
+    height: (height-width)/2, // 調整上方和下方的灰階遮罩高度
+    backgroundColor: '#808080',
+    opacity: 0.7,
+  },
+  squareFocusArea: {
+    width: '100%',
+    height: width, // 中間正方形可視區域
+    justifyContent: 'center',
+    alignItems: 'center',
+    // borderColor: 'white',
+    // borderWidth: 2,
   },
   buttonContainer: {
     flex: 1,
@@ -271,7 +349,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#007AFF',
+    backgroundColor: '#000',
     justifyContent: 'center',
     alignSelf: 'flex-end',
     alignItems: 'center',
@@ -334,7 +412,7 @@ const styles = StyleSheet.create({
     top: 10,
     right: 10,
     padding: 10,
-    backgroundColor: '#007AFF',
+    backgroundColor: '#000',
     borderRadius: 5,
   },
   openModalButton: {
@@ -344,7 +422,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#007AFF',
+    backgroundColor: '#000',
     justifyContent: 'center',
     alignItems: 'center',    
     alignSelf: 'flex-end',
@@ -386,7 +464,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   closeModalButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#000',
     borderRadius: 10,
     padding: 10,
     elevation: 2,

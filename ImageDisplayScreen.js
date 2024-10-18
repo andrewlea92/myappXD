@@ -10,6 +10,7 @@ export default function ImageDisplayScreen({ route, navigation }) {
   const [showAlert, setShowAlert] = useState(false); // Add state for alert
 
   const handleAiEdit = async () => {
+    console.log("imageUrls",imageUrls);
     let processed = [];
     // Simulate uploading images to an external API and receiving processed images
     if (debugMode) {
