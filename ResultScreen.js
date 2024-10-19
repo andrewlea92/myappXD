@@ -1,12 +1,15 @@
 import React from 'react';
-import { View, Image, StyleSheet, Text, TouchableOpacity, Clipboard, Alert, ScrollView } from 'react-native';
+import { View, Image, StyleSheet, Text, TouchableOpacity, Clipboard, Alert, ScrollView, Dimensions, Modal, Animated } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import * as FileSystem from 'expo-file-system';
 // import Clipboard from '@react-native-clipboard/clipboard';
 import { LogBox } from 'react-native';
 import { debugMode } from './DebugApiHandler';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { PanGestureHandler, State } from 'react-native-gesture-handler';
 LogBox.ignoreAllLogs(); // for suppressing clipboard warning
+
+const { width, height } = Dimensions.get('window');
 
 // Function to save Base64 image to Media Library
 const saveImageToMediaLibrary = async (base64DataUrl) => {
@@ -34,8 +37,24 @@ const saveImageToMediaLibrary = async (base64DataUrl) => {
   return fileUri;
 };
 
-export default function ResultScreen({ route }) {
+export default function ResultScreen({ route, navigation }) {
   const { processedUrls, aiText } = route.params;
+  const scaleAnim = React.useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = () => {
+    console.log('press in');
+    Animated.spring(scaleAnim, {
+      toValue: 2, // Scale down to 80%
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 1, // Scale back to original size
+      useNativeDriver: true,
+    }).start();
+  };
 
   const saveToAlbum = async () => {
     try {
@@ -53,54 +72,156 @@ export default function ResultScreen({ route }) {
     Clipboard.setString(aiText);
   };
 
+  const handleGesture = ({ nativeEvent }) => {
+    if (nativeEvent.state === State.END) {
+      if (nativeEvent.translationX > 50) {
+        navigation.goBack(); // Navigate to the previous screen
+      }
+    }
+  };
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {processedUrls.map((url, index) => (
-        <Image key={index} source={{ uri: url }} style={styles.image} />
-      ))}
-      {/* <TouchableOpacity style={styles.button} onPress={saveToAlbum}>
-        <Text style={styles.buttonText}>儲存至手機</Text>
-      </TouchableOpacity> */}
-      <TouchableOpacity style={styles.circleButton} onPress={saveToAlbum}>
-        <Icon name="download" size={30} color="white" />
-      </TouchableOpacity>
-      <Text style={styles.aiText}>{aiText}</Text>
-      {/* <TouchableOpacity style={styles.button} onPress={copyToClipboard}>
-        <Text style={styles.buttonText}>複製文案</Text>
-      </TouchableOpacity> */}
-      <TouchableOpacity style={styles.circleButton} onPress={copyToClipboard}>
-        <Icon name="copy" size={30} color="white" />
-      </TouchableOpacity>
-    </ScrollView>
+    <PanGestureHandler onHandlerStateChange={handleGesture}>
+      <View style={styles.background}>
+        <ScrollView
+          pagingEnabled
+          contentContainerStyle={styles.allScrollView}>
+          <View style={{ height: '50%', width: '100%' }}>
+            <Text style={styles.title}>Image</Text>
+            <ScrollView
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.imageScrollView}>
+              {processedUrls.map((url, index) => (
+                <View key={index} style={styles.imageContainer}>
+                  <Image
+                    key={index}
+                    source={{ uri: url }}
+                    style={styles.image}
+                  />
+                </View>
+              ))}
+            </ScrollView>
+            <View style={styles.toolbar}>
+              <TouchableOpacity
+                style={styles.circleButton}
+                onPress={saveToAlbum}
+                onPressIn={handlePressIn}
+                onPressOut={handlePressOut}>
+                <Icon name="download" size={30} color="white" />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* // this is the text part */}
+          <View style={{ height: '50%', width: '100%' }}>
+            <Text style={styles.title}>Copy the text</Text>
+            <ScrollView
+              horizontal={false}
+              contentContainerStyle={styles.aiTextScrollView}>
+              <Text style={styles.aiText}>sjdijijiwjdijwidjwidjiwdjiwjdiw</Text>
+            </ScrollView>
+
+            <View style={styles.toolbar}>
+              <TouchableOpacity
+                style={styles.circleButton}
+                onPress={copyToClipboard}
+                onPressIn={handlePressIn}
+                onPressOut={handlePressOut}>
+                <Icon name="copy" size={'30%'} color="white" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
+
+      </View>
+    </PanGestureHandler>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  background: {
+    width: width,
+    height: height,
+    color: 'white'
+  },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: '15%',
+    height: '10%',
+    width: '100%',
+  },
+  title: {
+    fontSize: 25,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: 'black',
+    marginTop: '20%',
+  },
+  allScrollView: {
+    width: width,
+    height: 2 * height,
+  },
+  imageScrollView: {
     flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    paddingTop: '5%',
+    paddingBottom: '5%',
+    width: width * 3,
+    height: '90%',
+  },
+  imageContainer: {
+    alignItems: 'center',
+    width: width,
+    height: '100%',
+    paddingLeft: 10,
+    paddingRight: 10,
   },
   image: {
-    width: 250,
-    height: 250,
-    marginBottom: 20,
+    width: '100%',
+    height: '100%',
+    borderRadius: 15
+  },
+  toolbar: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    height: '20%',
+    marginBottom: '20%'
   },
   button: {
-    padding: 10,
-    backgroundColor: '#007AFF',
-    borderRadius: 5,
-    marginTop: 20,
+    backgroundColor: 'black',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '90%',
+    height: '40%'
   },
   buttonText: {
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
   },
+  aiTextScrollView: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: '5%',
+    paddingBottom: '5%',
+    margin: '5%',
+    height: '90%',
+    borderWidth: 2,
+    borderColor: 'black',
+    borderRadius: 20,
+  },
   aiText: {
     marginTop: 20,
     fontSize: 16,
+    fontWeight: 'bold',
+    color: 'black',
     textAlign: 'center',
   },
   circleButton: {
