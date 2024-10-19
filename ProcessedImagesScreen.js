@@ -166,28 +166,38 @@ export default function ProcessedImagesScreen({ route, navigation }) {
       </View>
     ))}
 
-  <View style={styles.buttonContainer}>
-    {!isRecordingComplete ? (
-      <TouchableOpacity style={styles.circleButton} onPress={recording ? stopRecording : startRecording}>
-        <Icon name={recording ? 'stop' : 'microphone'} size={30} color={recording ? 'red' : 'green'} />
-      </TouchableOpacity>
-    ) : (
-      <>
-        <TouchableOpacity style={styles.circleButton} onPress={replayRecording}>
-          <Icon name={isPlaying ? 'pause' : 'play'} size={30} color="white" />
+    <View style={styles.buttonContainer}>
+      {!isRecordingComplete ? (
+        <TouchableOpacity style={styles.circleButton} onPress={recording ? stopRecording : startRecording}>
+          <Icon name={recording ? 'stop' : 'microphone'} size={30} color={recording ? 'red' : 'green'} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.circleButton} onPress={resetRecording}>
-          <Icon name="trash-o" size={30} color="white"/>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.circleButton} onPress={handleAiTextWithAudio}>
-          <Image
-            source={require('./assets/Gemini_icon.png')} // Update the path to your custom icon file
-            style={styles.customIcon}
-          />
-        </TouchableOpacity>
-      </>
-    )}
-  </View>
+      ) : (
+        <>
+          <TouchableOpacity style={styles.circleButton} onPress={replayRecording}>
+            <Icon name={isPlaying ? 'pause' : 'play'} size={30} color="white" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.circleButton} onPress={resetRecording}>
+            <Icon name="trash-o" size={30} color="white"/>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.circleButton} onPress={handleAiTextWithAudio}>
+            <Image
+              source={require('./assets/Gemini_icon.png')} // Update the path to your custom icon file
+              style={styles.customIcon}
+            />
+          </TouchableOpacity>
+        </>
+      )}
+    </View>
+
+    {/* 評分系統 */}
+    <View style={styles.rateContainer}>
+      <CustomRating title={'口味'} setRating={handleTasteRating}/>
+      <CustomRating title={'價格'} setRating={handleMoneyRating}/>
+      <CustomRating title={'環境'} setRating={handleEnvRating}/>
+      {/* <Text style={styles.buttonText}>{tasteRating}</Text>
+      <Text style={styles.buttonText}>{moneyRating}</Text>
+      <Text style={styles.buttonText}>{envRating}</Text> */}
+    </View>
 
 
     <View style={styles.aiTextBox}>
