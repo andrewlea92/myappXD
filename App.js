@@ -222,13 +222,11 @@ function CameraScreen({ navigation }) {
           </View>
         </View>
 
-        {/* <PanGestureHandler onGestureEvent={handleGesture}> */}
-          {/* 中間正方形可視區域 */}
-          <View style={styles.squareFocusArea}>
-            {loading && <ActivityIndicator size="large" color="#000" style={styles.loadingIndicator} />}
-            {renderOverlayImages()}
-          </View>
-        {/* </PanGestureHandler> */}
+        {/* 中間正方形可視區域 */}
+        <View style={styles.squareFocusArea}>
+          {loading && <ActivityIndicator size="large" color="#000" style={styles.loadingIndicator} />}
+          {renderOverlayImages()}
+        </View>
 
         {/* 下方灰階遮罩 */}
         <View style={styles.overlay}>
