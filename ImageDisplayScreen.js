@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { View, Image, StyleSheet, TouchableOpacity, Text, ScrollView } from 'react-native';
+import { View, Image, StyleSheet, TouchableOpacity, Text, ScrollView, Dimensions } from 'react-native';
 import { generateAiProcessedImage } from './AiApiHandler';
-import { debugProcessedImage ,debugMode } from './DebugApiHandler';
+import { debugProcessedImage, debugMode } from './DebugApiHandler';
+
+const { width, height } = Dimensions.get('window');
 
 export default function ImageDisplayScreen({ route, navigation }) {
   const { imageUrls } = route.params;
@@ -10,15 +12,14 @@ export default function ImageDisplayScreen({ route, navigation }) {
   const [showAlert, setShowAlert] = useState(false); // Add state for alert
 
   const handleAiEdit = async () => {
-    console.log("imageUrls",imageUrls);
+    console.log("imageUrls", imageUrls);
     let processed = [];
     // Simulate uploading images to an external API and receiving processed images
     if (debugMode) {
       processed = await debugProcessedImage(imageUrls);
       console.log('Processed URLs:', processed);
     }
-    else
-    {
+    else {
       processed = await generateAiProcessedImage(imageUrls);
     }
     setProcessedUrls(processed);
@@ -39,58 +40,82 @@ export default function ImageDisplayScreen({ route, navigation }) {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {(processedUrls.length > 0 ? processedUrls : imageUrls).map((url, index) => (
-        <View key={index} style={styles.imageContainer}>
-          <Image
-            key={index}
-            source={{ uri: url }}
-            style={styles.image}
-          />
-        </View>
-      ))}
-      {showAlert && (
-        <View style={styles.alertContainer}>
-          <Text style={styles.alertText}>AI 修圖完畢!</Text>
-        </View>
-      )}
-      {showNextButton && (
-        <TouchableOpacity style={styles.button} onPress={handleNextStep}>
-          <Text style={styles.buttonText}>下一步</Text>
+    <View>
+      <ScrollView
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.scrollView}>
+        {(processedUrls.length > 0 ? processedUrls : imageUrls).map((url, index) => (
+          <View key={index} style={styles.imageContainer}>
+            <Image
+              key={index}
+              source={{ uri: url }}
+              style={styles.image}
+            />
+          </View>
+        ))}
+        {showAlert && (
+          <View style={styles.alertContainer}>
+            <Text style={styles.alertText}>AI 修圖完畢!</Text>
+          </View>
+        )}
+        {showNextButton && (
+          <TouchableOpacity style={styles.button} onPress={handleNextStep}>
+            <Text style={styles.buttonText}>下一步</Text>
+          </TouchableOpacity>
+        )}
+      </ScrollView>
+      <View style={styles.toolbar}>
+        <TouchableOpacity style={styles.button} onPress={handleAiEdit}>
+          <Text style={styles.buttonText}>AI 修圖</Text>
         </TouchableOpacity>
-      )}
-      <TouchableOpacity style={styles.button} onPress={handleAiEdit}>
-        <Text style={styles.buttonText}>AI 修圖</Text>
-      </TouchableOpacity>
-    </ScrollView>
+      </View>
+    </View>
+
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  scrollView: {
     flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    paddingTop: 50,
+    width: width * 3,
   },
   imageContainer: {
     alignItems: 'center',
-    marginBottom: 20,
+    width: width,
+    height: '100%',
+    paddingLeft: 10,
+    paddingRight: 10,
   },
   image: {
-    width: 250,
-    height: 250,
+    width: '100%',
+    height: '75%',
   },
   urlText: {
     marginTop: 5,
     fontSize: 12,
     color: 'gray',
   },
+  toolbar: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alighItems: 'center',
+    backgroundColor: '#FFF',
+    height: '15%',
+    marginBottom: '10%',
+  },
   button: {
-    marginTop: 20,
-    padding: 10,
     backgroundColor: '#007AFF',
     borderRadius: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: '3%',
+    width: '30%',
+    height: '75%'
   },
   buttonText: {
     color: 'white',
