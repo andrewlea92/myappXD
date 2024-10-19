@@ -36,33 +36,6 @@ function CameraScreen({ navigation }) {
   const [overlayOpacity, setOverlayOpacity] = React.useState(0.5); // State to control overlay opacity
   const [foodInput, setFoodInput] = React.useState(''); // State to manage food input
   const [isModalVisible, setIsModalVisible] = React.useState(false); // 管理彈窗狀態
-  const [swipeStartX, setSwipeStartX] = React.useState(null);
-  const [isCooldown, setIsCooldown] = React.useState(false);
-
-  const handleGesture = (event) => {
-    const { translationX } = event.nativeEvent;
-    if (swipeStartX === null) {
-      setSwipeStartX(translationX);
-    } else {
-      const deltaX = translationX - swipeStartX;
-      if (!isCooldown) {
-        // 右滑動觸發切換下一張圖片
-        if (deltaX > 10) {
-          cycleOverlayImage();
-          setSwipeStartX(null); // 重置起始點
-          setIsCooldown(true);
-          setTimeout(() => setIsCooldown(false), 500); // 1秒cool down
-        }
-        // 左滑動可加入其他功能，例如回到前一張圖片
-        else if (deltaX < -10) {
-          // 左滑可以加入其它功能，比如回到前一张图片
-          setSwipeStartX(null); // 重置起始點
-          setIsCooldown(true);
-          setTimeout(() => setIsCooldown(false), 500); // 1秒cool down
-        }
-      }
-    }
-  };
 
   React.useEffect(() => {
     (async () => {
@@ -115,24 +88,35 @@ function CameraScreen({ navigation }) {
     setIsModalVisible(false);
   };
 
-  const cycleOverlayImage = () => {
-    if (overlayImages.length > 0) {
-      setShownOverlayImageIdx((prevIdx) => (prevIdx + 1) % overlayImages.length);
-    }
-  }
 
   const renderOverlayImages = () => {
-    if (overlayImages.length > 0 && shownOverlayImageIdx < overlayImages.length) {
-      return (
-        <Image
-          source={overlayImages[shownOverlayImageIdx]}
-          style={[styles.overlayImage, { opacity: overlayOpacity }]}
-          resizeMode="contain"
-          pointerEvents="none" // This ensures that the image doesn't block interactions
-        />
-      );
-    }
-    return <Image style={styles.emptyOverlayImage} />;
+    return (
+      <ScrollView
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.scrollView}
+        onScroll={handleScroll}
+        scrollEventThrottle={16} // Ensure smooth scrolling
+      >
+        {overlayImages.map((image, index) => (
+          <View key={index} style={styles.imageContainer}>
+            <Image
+              source={image}
+              style={[styles.overlayImage, { opacity: overlayOpacity }]}
+              resizeMode="contain"
+              pointerEvents="none" // This ensures that the image doesn't block interactions
+            />
+          </View>
+        ))}
+      </ScrollView>
+    );
+  };
+
+  const handleScroll = (event) => {
+    const contentOffsetX = event.nativeEvent.contentOffset.x;
+    const currentIndex = Math.round(contentOffsetX / width);
+    setShownOverlayImageIdx(currentIndex);
   };
 
 
@@ -238,13 +222,11 @@ function CameraScreen({ navigation }) {
             </View>
           </View>
 
-          <PanGestureHandler onGestureEvent={handleGesture}>
           {/* 中間正方形可視區域 */}
           <View style={styles.squareFocusArea}>
             {loading && <ActivityIndicator size="large" color="#000" style={styles.loadingIndicator} />}
             {renderOverlayImages()}
           </View>
-          </PanGestureHandler>
 
           {/* 下方灰階遮罩 */}
           <View style={styles.overlay}>
@@ -348,13 +330,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   overlayImage: {
-    position: 'absolute',
+    //position: 'absolute',
+    resizeMode: 'contain',
     width: '100%',
     height: '100%',
-    top: 0,
-    left: 0,
-    // justifyContent: 'center',
-    // alignItems: 'center',
+    //top: 0,
+    //left: 0,
   },
   emptyOverlayImage: {
     width: 0,
@@ -557,5 +538,14 @@ const styles = StyleSheet.create({
   },
   inactiveDot: {
     backgroundColor: 'black',
+  },
+  scrollView: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  imageContainer: {
+    width: width, // Ensure each image takes up the full width of the screen
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

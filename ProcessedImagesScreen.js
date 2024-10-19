@@ -15,8 +15,10 @@ export default function ProcessedImagesScreen({ route, navigation }) {
   const [recording, setRecording] = useState();
   const [recordedUrl, setRecordedUrl] = useState();
   const [permissionResponse, requestPermission] = Audio.usePermissions();
-  const [isRecordingMode, setIsRecordingMode] = useState(false); // 新增狀態來控制錄音或手動輸入
+  const [isRecordingComplete, setIsRecordingComplete] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [playbackObject, setPlaybackObject] = useState(null);
 
 
   const toggleModal = () => {
@@ -74,19 +76,48 @@ export default function ProcessedImagesScreen({ route, navigation }) {
     const uri = recording.getURI();
     console.log('Recording stopped and stored at', uri);
     setRecordedUrl(uri);
-    // const { sound } = await Audio.Sound.createAsync({ uri });
-    // await sound.playAsync();
+    setIsRecordingComplete(true); // Set recording complete to true
   }
 
-  async function replayRecording() {
-    if (recordedUrl) {
-      const uri = recordedUrl;
-      const { sound } = await Audio.Sound.createAsync({ uri });
-      await sound.playAsync();
-    } else {
-      console.log('No recording available to replay');
+  const resetRecording = () => {
+    setRecording(undefined);
+    setRecordedUrl(undefined);
+    setIsRecordingComplete(false); // Reset recording complete to false
+  };
+
+  const replayRecording = async () => {
+    try {
+      if (isPlaying) {
+        console.log('Stopping playback..');
+        // Stop playback if already playing
+        if (playbackObject) {
+          await playbackObject.stopAsync();
+          await playbackObject.unloadAsync();
+          setPlaybackObject(null);
+        }
+        setIsPlaying(false);
+      } else {
+        // Start playback
+        console.log('Starting playback..');
+        const { sound } = await Audio.Sound.createAsync(
+          { uri: recordedUrl },
+          { shouldPlay: true }
+        );
+        setPlaybackObject(sound);
+        setIsPlaying(true);
+  
+        sound.setOnPlaybackStatusUpdate((status) => {
+          if (status.didJustFinish) {
+            console.log('Stopping playback..');
+            setIsPlaying(false);
+            setPlaybackObject(null);
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error during playback:', error);
     }
-  }
+  };
 
   const handleAiTextWithAudio = async () => {
     setLoading(true);
@@ -110,33 +141,28 @@ export default function ProcessedImagesScreen({ route, navigation }) {
       </View>
     ))}
 
-    {/* 新增選擇模式的按鈕 */}
-    {/* <View style={styles.buttonContainer}>
-      <TouchableOpacity style={[styles.button, styles.buttonMargin]} onPress={() => setIsRecordingMode(true)}>
-        <Text style={styles.buttonText}>錄音</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={[styles.button, styles.buttonMargin]} onPress={toggleModal}>
-        <Text style={styles.buttonText}>手動輸入</Text>
-      </TouchableOpacity>
-    </View> */}
-
-    <View style={styles.buttonContainer}>
+  <View style={styles.buttonContainer}>
+    {!isRecordingComplete ? (
       <TouchableOpacity style={styles.circleButton} onPress={recording ? stopRecording : startRecording}>
         <Icon name={recording ? 'stop' : 'microphone'} size={30} color={recording ? 'red' : 'green'} />
       </TouchableOpacity>
-      <TouchableOpacity style={styles.circleButton} onPress={replayRecording}>
-        <Icon name="repeat" size={30} color="white"/>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.circleButton} onPress={handleAiTextWithAudio}>
-        <Image
-          source={require('./assets/Gemini_icon.png')} // Update the path to your custom icon file
-          style={styles.customIcon}
-        />
-      </TouchableOpacity>
-    </View>
-    {/* <TouchableOpacity style={styles.button} onPress={handleAiTextWithAudio}>
-      <Text style={styles.buttonText}>錄音檔生成 AI 文案</Text>
-    </TouchableOpacity> */}
+    ) : (
+      <>
+        <TouchableOpacity style={styles.circleButton} onPress={replayRecording}>
+          <Icon name={isPlaying ? 'pause' : 'play'} size={30} color="white" />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.circleButton} onPress={resetRecording}>
+          <Icon name="trash-o" size={30} color="white"/>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.circleButton} onPress={handleAiTextWithAudio}>
+          <Image
+            source={require('./assets/Gemini_icon.png')} // Update the path to your custom icon file
+            style={styles.customIcon}
+          />
+        </TouchableOpacity>
+      </>
+    )}
+  </View>
 
 
     <View style={styles.aiTextBox}>
@@ -233,7 +259,7 @@ const styles = StyleSheet.create({
   },
   button: {
     padding: 10,
-    backgroundColor: '#007AFF',
+    backgroundColor: 'black',
     borderRadius: 5,
     marginTop: 20,
   },
