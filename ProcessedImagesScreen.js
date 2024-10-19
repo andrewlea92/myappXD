@@ -28,7 +28,13 @@ export default function ProcessedImagesScreen({ route, navigation }) {
 
   const [tasteRating, setTasteRating] = useState(0)
   const [envRating, setEnvRating] = useState(0)
-  const [moneyRating, setMoneyRating] = useState(0)
+  const [priceRating, setPriceRating] = useState(0)
+
+  const ratings = {
+    "口味": [tasteRating, setTasteRating],
+    "價格": [envRating, setEnvRating],
+    "環境": [priceRating, setPriceRating]
+};
 
   const handleTasteRating = (rating) => {
     setTasteRating(rating)
@@ -38,33 +44,92 @@ export default function ProcessedImagesScreen({ route, navigation }) {
     setEnvRating(rating)
   }
 
-  const handleMoneyRating = (rating) => {
-    setMoneyRating(rating)
+  const handlePriceRating = (rating) => {
+    setPriceRating(rating)
   }
 
-  /* -------------------------------------------------------------------------- */
-  /*                                                                            */
-  /* -------------------------------------------------------------------------- */
+  const checkRatingValid = () => {
+    if (tasteRating==0 || envRating==0 || priceRating==0) {
+      return false
+    }
+    return true
+  }
+
+/* -------------------------------------------------------------------------- */
+/*                             Backend API Related                            */
+/* -------------------------------------------------------------------------- */
+
+const handleTextGerneration = async () => {
+  
+  // Check if rating is empty
+  if (!checkRatingValid) {
+    // Error Handling
+    return
+  }
+
+  setLoading(true);
+
+}
+
+const handleAiTextWithHint = async () => {
+  setLoading(true);
+
+  let generatedText;
+  if (debugMode) {
+    generatedText = await debugCaption(storeName, items, review);
+  } else {
+    generatedText = await generateAiCaption(storeName, items, review);
+  }
+
+  setAiText(generatedText);
+  setLoading(false);
+  setIsModalVisible(false); // Close the modal after generating AI text
+  console.log('AI 文案 button pressed');
+};
+
+const handleAiTextWithAudio = async () => {
+  setLoading(true);
+  let generatedText;
+  if (debugMode) {
+    generatedText = await debugCaptionWithAudio(recordedUrl);
+  } else {
+    generatedText = await generateAiCaptionWithAudio(recordedUrl);
+  }
+
+  // print(generatedText)
+  start_idx = generatedText.lastIndexOf('-');
+
+  console.log("HI")
+  const fullmoon = "🌕";
+  const nomoon = "🌑"
+  console.log("HI2", tasteRating, priceRating, envRating)
+  // format_str = `\n口味 ${fullmoon.repeat(tasteRating)}${nomoon.repeat(5-tasteRating)}\n價格 ${fullmoon.repeat(priceRating)}${nomoon.repeat(5-priceRating)}\n環境 ${fullmoon.repeat(envRating)}${nomoon.repeat(5-envRating)}\n-\n`
+  
+  format_str = '\n'
+  for (const key in ratings) {
+    if (ratings.hasOwnProperty(key)) {
+      format_str += `${key} ${fullmoon.repeat(ratings[key][0])}${nomoon.repeat(5-ratings[key][0])}\n`
+    }
+  }
+  format_str += '-'
+
+  generatedText = generatedText.substring(0, start_idx+1) + format_str + generatedText.substring(start_idx+1)
+  console.log(generatedText)
+
+  setAiText(generatedText);
+  setLoading(false);
+  console.log('AI 文案2 button pressed');
+};
+
+/* -------------------------------------------------------------------------- */
+/*                                                                            */
+/* -------------------------------------------------------------------------- */
 
   const toggleModal = () => {
     setIsModalVisible(!isModalVisible);
   };
 
-  const handleAiTextWithHint = async () => {
-    setLoading(true);
 
-    let generatedText;
-    if (debugMode) {
-      generatedText = await debugCaption(storeName, items, review);
-    } else {
-      generatedText = await generateAiCaption(storeName, items, review);
-    }
-
-    setAiText(generatedText);
-    setLoading(false);
-    setIsModalVisible(false); // Close the modal after generating AI text
-    console.log('AI 文案 button pressed');
-  };
 
   const handleNextStep = () => {
     navigation.navigate('Result', { processedUrls, aiText });
@@ -144,19 +209,7 @@ export default function ProcessedImagesScreen({ route, navigation }) {
     }
   };
 
-  const handleAiTextWithAudio = async () => {
-    setLoading(true);
-    let generatedText;
-    if (debugMode) {
-      generatedText = await debugCaptionWithAudio(recordedUrl);
-    } else {
-      generatedText = await generateAiCaptionWithAudio(recordedUrl);
-    }
 
-    setAiText(generatedText);
-    setLoading(false);
-    console.log('AI 文案2 button pressed');
-  };
 
   return (
   <ScrollView contentContainerStyle={styles.container}>
@@ -191,14 +244,10 @@ export default function ProcessedImagesScreen({ route, navigation }) {
 
     {/* 評分系統 */}
     <View style={styles.rateContainer}>
-      <CustomRating title={'口味'} setRating={handleTasteRating}/>
-      <CustomRating title={'價格'} setRating={handleMoneyRating}/>
-      <CustomRating title={'環境'} setRating={handleEnvRating}/>
-      {/* <Text style={styles.buttonText}>{tasteRating}</Text>
-      <Text style={styles.buttonText}>{moneyRating}</Text>
-      <Text style={styles.buttonText}>{envRating}</Text> */}
+      {Object.entries(ratings).map(([type, props], index) => (
+        <CustomRating title={type} setRating={props[1]}/>
+      ))}
     </View>
-
 
     <View style={styles.aiTextBox}>
       <Text style={styles.aiText}>{aiText || 'AI 文案將顯示在這裡'}</Text>
