@@ -208,70 +208,72 @@ function CameraScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      
-        <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
 
-          {/* 上方灰階遮罩 */}
-          <View style={styles.overlay} >
-            {/* 放置在上方灰階遮罩中的元素 */}
-            <View style={styles.buttonContainer}>
-              <Text style={styles.imageCountText}>{imageCount} / 3</Text>
-              <TouchableOpacity style={styles.openModalButton} onPress={openModal}>
-                <Icon name="lightbulb-o" size={30} color="white" />
-              </TouchableOpacity>
-            </View>
+      <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
+
+        {/* 上方灰階遮罩 */}
+        <View style={styles.overlay} >
+          {/* 放置在上方灰階遮罩中的元素 */}
+          <View style={styles.buttonContainer}>
+            <Text style={styles.imageCountText}>{imageCount} / 3</Text>
+            <TouchableOpacity style={styles.openModalButton} onPress={openModal}>
+              <Icon name="lightbulb-o" size={30} color="white" />
+            </TouchableOpacity>
           </View>
+        </View>
 
+        <PanGestureHandler onGestureEvent={handleGesture}>
           {/* 中間正方形可視區域 */}
           <View style={styles.squareFocusArea}>
             {loading && <ActivityIndicator size="large" color="#000" style={styles.loadingIndicator} />}
             {renderOverlayImages()}
           </View>
+        </PanGestureHandler>
 
-          {/* 下方灰階遮罩 */}
-          <View style={styles.overlay}>
-            
-            {/* 底部的點點 */}
-            {renderDots()}
+        {/* 下方灰階遮罩 */}
+        <View style={styles.overlay}>
 
-            {/* 底部的滑動條 */}
-            <View style={overlayImages.length?styles.sliderContainer:styles.hiddenSliderContainer}>
-              <View style={styles.sliderRow}>
-                <MaterialIcons name="opacity" size={30} color="white" />
-                {/* <Text style={styles.sliderLabel}>Overlay Opacity</Text> */}
-                <Slider
-                  
-                  disabled={overlayImages.length?false:true}
-                  style={styles.slider}
-                  minimumValue={0}
-                  maximumValue={1}
-                  value={overlayOpacity}
-                  onValueChange={setOverlayOpacity}
-                  minimumTrackTintColor="#000"
-                  maximumTrackTintColor="#ccc"
-                  thumbTintColor="#fff"
-                  
-                />
-              </View>
-            </View>
+          {/* 底部的點點 */}
+          {renderDots()}
 
-            {/* 放置在下方灰階遮罩中的按鈕 */}
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity style={styles.circleButton} onPress={toggleCameraFacing}>
-                <Icon name="refresh" size={30} color="white" />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.circleButton} onPress={takePicture} disabled={loading}>
-                <Icon name="camera" size={30} color="white" />
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.circleButton} onPress={handleAiOverlay} disabled={loading}>
-                <Icon name="magic" size={30} color="white" />
-              </TouchableOpacity>
+          {/* 底部的滑動條 */}
+          <View style={overlayImages.length ? styles.sliderContainer : styles.hiddenSliderContainer}>
+            <View style={styles.sliderRow}>
+              <MaterialIcons name="opacity" size={30} color="white" />
+              {/* <Text style={styles.sliderLabel}>Overlay Opacity</Text> */}
+              <Slider
+
+                disabled={overlayImages.length ? false : true}
+                style={styles.slider}
+                minimumValue={0}
+                maximumValue={1}
+                value={overlayOpacity}
+                onValueChange={setOverlayOpacity}
+                minimumTrackTintColor="#000"
+                maximumTrackTintColor="#ccc"
+                thumbTintColor="#fff"
+
+              />
             </View>
           </View>
 
-        </CameraView>
+          {/* 放置在下方灰階遮罩中的按鈕 */}
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.circleButton} onPress={toggleCameraFacing}>
+              <Icon name="refresh" size={30} color="white" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.circleButton} onPress={takePicture} disabled={loading}>
+              <Icon name="camera" size={30} color="white" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.circleButton} onPress={handleAiOverlay} disabled={loading}>
+              <Icon name="magic" size={30} color="white" />
+            </TouchableOpacity>
+          </View>
+        </View>
 
-      
+      </CameraView>
+
+
 
       {/* 彈出式視窗 */}
       <Modal
@@ -313,7 +315,7 @@ export default function App() {
       >
         <Stack.Screen name="Cover" component={CoverScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Camera" component={CameraScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="ImageDisplay" component={ImageDisplayScreen} />
+        <Stack.Screen name="ImageDisplay" component={ImageDisplayScreen} options={{ headerShown: false }} />
         <Stack.Screen name="ProcessedImages" component={ProcessedImagesScreen} />
         <Stack.Screen name="Result" component={ResultScreen} />
       </Stack.Navigator>
