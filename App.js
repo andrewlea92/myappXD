@@ -217,18 +217,19 @@ function CameraScreen({ navigation }) {
 
           {/* 中間正方形可視區域 */}
           <View style={styles.squareFocusArea}>
+            {loading && <ActivityIndicator size="large" color="#000" style={styles.loadingIndicator} />}
             {renderOverlayImages()}
-            
-            
           </View>
 
           {/* 下方灰階遮罩 */}
           <View style={styles.overlay}>
 
             {/* 底部的滑動條 */}
-            <View style={styles.sliderContainer}>
+            <View style={overlayImages.length?styles.sliderContainer:styles.hiddenSliderContainer}>
               <Text style={styles.sliderLabel}>Overlay Opacity</Text>
               <Slider
+                
+                disabled={overlayImages.length?false:true}
                 style={styles.slider}
                 minimumValue={0}
                 maximumValue={1}
@@ -257,7 +258,7 @@ function CameraScreen({ navigation }) {
         </CameraView>
       </PanGestureHandler>
 
-      {loading && <ActivityIndicator size="large" color="#000" style={styles.loadingIndicator} />}
+      
 
       {/* 彈出式視窗 */}
       <Modal
@@ -380,9 +381,25 @@ const styles = StyleSheet.create({
   },
   loadingIndicator: {
     position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: [{ translateX: -50 }, { translateY: -50 }],
+    top: '45%',
+    left: '46%',
+    // transform: [{ translateX: -50 }, { translateY: -50 }],
+  },
+  hiddenSliderContainer: {
+    display: 'none',
+    position: 'absolute',
+    // top: '50%',
+    // right: 50, // 將 right 屬性調整為 10，向左移動
+    // transform: [{ rotate: '-90deg' }, { translateY: -150 }],
+    // width: 300,
+    bottom: '55%',  // 將滑動條放置在距離螢幕底部 30 像素的位置
+    left: '10%',
+    right: 0,    // left 和 right 設置為 0 以使滑動條水平居中
+    width: '80%',  // 設定寬度為 80% 讓滑動條佔據螢幕的 80%
+    height: 100,
+    justifyContent: 'center',
+    padding: 10,
+    borderRadius: 10,
   },
   sliderContainer: {
     position: 'absolute',
