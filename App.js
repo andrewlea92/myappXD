@@ -1,7 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Camera, CameraView, useCameraPermissions } from 'expo-camera';
-import { Button, StyleSheet, Text, TouchableOpacity, View, Image, ActivityIndicator, Clipboard, TextInput, Modal , ScrollView, Dimensions } from 'react-native';
+import { Button, StyleSheet, Text, TouchableOpacity, View, Image, ActivityIndicator, Clipboard, TextInput, Modal, ScrollView, Dimensions } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import * as React from "react";
 import ImageDisplayScreen from './ImageDisplayScreen'; // Import the new screen
@@ -9,10 +9,11 @@ import ProcessedImagesScreen from './ProcessedImagesScreen';
 import ResultScreen from './ResultScreen';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { generateAiOverlay } from './AiApiHandler';
-import { debugOverlay , debugMode } from './DebugApiHandler';
+import { debugOverlay, debugMode } from './DebugApiHandler';
 import Slider from '@react-native-community/slider';
 import { PanGestureHandler } from 'react-native-gesture-handler';
 import * as ImageManipulator from 'expo-image-manipulator';
+import CoverScreen from './CoverScreen';
 
 
 
@@ -31,7 +32,7 @@ function CameraScreen({ navigation }) {
   const [loading, setLoading] = React.useState(false);
   const [overlayImages, setOverlayImages] = React.useState([]);
   const [shownOverlayImageIdx, setShownOverlayImageIdx] = React.useState(0); // State to manage the shown overlay image index
-  const [overlayOpacity, setOverlayOpacity] = React.useState(1); // State to control overlay opacity
+  const [overlayOpacity, setOverlayOpacity] = React.useState(0.5); // State to control overlay opacity
   const [foodInput, setFoodInput] = React.useState(''); // State to manage food input
   const [isModalVisible, setIsModalVisible] = React.useState(false); // 管理彈窗狀態
   const [swipeStartX, setSwipeStartX] = React.useState(null);
@@ -50,7 +51,7 @@ function CameraScreen({ navigation }) {
           setSwipeStartX(null); // 重置起始點
           setIsCooldown(true);
           setTimeout(() => setIsCooldown(false), 500); // 1秒cool down
-        } 
+        }
         // 左滑動可加入其他功能，例如回到前一張圖片
         else if (deltaX < -10) {
           // 左滑可以加入其它功能，比如回到前一张图片
@@ -108,7 +109,7 @@ function CameraScreen({ navigation }) {
   const openModal = () => {
     setIsModalVisible(true);
   };
-  
+
   const closeModal = () => {
     setIsModalVisible(false);
   };
@@ -122,17 +123,17 @@ function CameraScreen({ navigation }) {
   const renderOverlayImages = () => {
     if (overlayImages.length > 0 && shownOverlayImageIdx < overlayImages.length) {
       return (
-          <Image
-            source={overlayImages[shownOverlayImageIdx]}
-            style={[styles.overlayImage, { opacity: overlayOpacity }]}
-            resizeMode="contain"
-            pointerEvents="none" // This ensures that the image doesn't block interactions
-          />
+        <Image
+          source={overlayImages[shownOverlayImageIdx]}
+          style={[styles.overlayImage, { opacity: overlayOpacity }]}
+          resizeMode="contain"
+          pointerEvents="none" // This ensures that the image doesn't block interactions
+        />
       );
     }
     return <Image style={styles.emptyOverlayImage} />;
   };
-  
+
 
   function toggleCameraFacing() {
     setFacing(current => (current === 'back' ? 'front' : 'back'));
@@ -145,11 +146,11 @@ function CameraScreen({ navigation }) {
         const photo = await cameraRef.current.takePictureAsync();
         const squareSize = photo.width; // 使用拍攝的照片寬度作為裁剪大小
         const { uri, width, height } = photo;
-  
+
         // 計算裁剪的起始點，確保不超出邊界
         const originX = Math.max(0, (width - squareSize) / 2);
         const originY = Math.max(0, (height - squareSize) / 2);
-  
+
         // 使用 ImageManipulator 進行裁剪
         const croppedImage = await ImageManipulator.manipulateAsync(
           uri,
@@ -174,28 +175,32 @@ function CameraScreen({ navigation }) {
       }
     }
   };
-  
-  
-  
+
+
+
 
   const handleAiOverlay = async () => {
     if (cameraRef.current) {
       setTimeout(() => setLoading(true), 250); // Show after blinking effect with delay
       const photo = await cameraRef.current.takePictureAsync();
-      
+
       let overlayImages;
       if (debugMode) {
         console.log('Debug mode enabled');
         overlayImages = await debugOverlay(photo.uri, foodInput);
-        
+
       } else {
         // Call generateAiOverlay with the photo URI
         overlayImages = await generateAiOverlay(photo.uri, foodInput);
       }
-  
+
       setOverlayImages(overlayImages); // Set the overlay image to the first image in the array
-  
+
       setLoading(false);
+
+      //! Remove foodInput after overlay generation
+      setFoodInput("")
+
       console.log('AI 覆蓋 button pressed');
     }
   };
@@ -227,7 +232,7 @@ function CameraScreen({ navigation }) {
             <View style={styles.buttonContainer}>
               <Text style={styles.imageCountText}>{imageCount} / 3</Text>
               <TouchableOpacity style={styles.openModalButton} onPress={openModal}>
-                <Icon name="lightbulb-o" size={30} color="white"/>
+                <Icon name="lightbulb-o" size={30} color="white" />
               </TouchableOpacity>
             </View>
           </View>
@@ -235,6 +240,13 @@ function CameraScreen({ navigation }) {
           {/* 中間正方形可視區域 */}
           <View style={styles.squareFocusArea}>
             {renderOverlayImages()}
+            
+            
+          </View>
+
+          {/* 下方灰階遮罩 */}
+          <View style={styles.overlay}>
+
             {/* 底部的滑動條 */}
             <View style={styles.sliderContainer}>
               <Text style={styles.sliderLabel}>Overlay Opacity</Text>
@@ -245,14 +257,11 @@ function CameraScreen({ navigation }) {
                 value={overlayOpacity}
                 onValueChange={setOverlayOpacity}
                 minimumTrackTintColor="#000"
-                maximumTrackTintColor="#ccc" 
-                thumbTintColor="#fff" 
+                maximumTrackTintColor="#ccc"
+                thumbTintColor="#fff"
               />
             </View>
-          </View>
 
-          {/* 下方灰階遮罩 */}
-          <View style={styles.overlay}>
             {renderDots()}
             {/* 放置在下方灰階遮罩中的按鈕 */}
             <View style={styles.buttonContainer}>
@@ -271,7 +280,7 @@ function CameraScreen({ navigation }) {
         </CameraView>
       </PanGestureHandler>
 
-      {loading && <ActivityIndicator size="large" color="#000" style={styles.loadingIndicator}/>}
+      {loading && <ActivityIndicator size="large" color="#000" style={styles.loadingIndicator} />}
 
       {/* 彈出式視窗 */}
       <Modal
@@ -304,14 +313,15 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="Camera"
+        initialRouteName="Cover"
         screenOptions={{
           headerStyle: { backgroundColor: '#000' }, // 設置標題欄背景顏色
           headerTintColor: '#fff', // 設置標題文字顏色
           headerTitleStyle: { fontWeight: 'bold' }, // 設置標題文字樣式
         }}
       >
-        <Stack.Screen name="Camera" component={CameraScreen} options={{ headerShown: false }}/>
+        <Stack.Screen name="Cover" component={CoverScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Camera" component={CameraScreen} options={{ headerShown: false }} />
         <Stack.Screen name="ImageDisplay" component={ImageDisplayScreen} />
         <Stack.Screen name="ProcessedImages" component={ProcessedImagesScreen} />
         <Stack.Screen name="Result" component={ResultScreen} />
@@ -344,7 +354,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     width: '100%',
-    height: (height-width)/2, // 調整上方和下方的灰階遮罩高度
+    height: (height - width) / 2, // 調整上方和下方的灰階遮罩高度
     backgroundColor: '#808080',
     opacity: 0.7,
   },
@@ -399,10 +409,14 @@ const styles = StyleSheet.create({
   },
   sliderContainer: {
     position: 'absolute',
-    top: '50%',
-    right: 50, // 將 right 屬性調整為 10，向左移動
-    transform: [{ rotate: '-90deg' }, { translateY: -150 }],
-    width: 300,
+    // top: '50%',
+    // right: 50, // 將 right 屬性調整為 10，向左移動
+    // transform: [{ rotate: '-90deg' }, { translateY: -150 }],
+    // width: 300,
+    bottom: '55%',  // 將滑動條放置在距離螢幕底部 30 像素的位置
+    left: '10%',
+    right: 0,    // left 和 right 設置為 0 以使滑動條水平居中
+    width: '80%',  // 設定寬度為 80% 讓滑動條佔據螢幕的 80%
     height: 100,
     justifyContent: 'center',
     padding: 10,
@@ -447,7 +461,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     backgroundColor: '#000',
     justifyContent: 'center',
-    alignItems: 'center',    
+    alignItems: 'center',
     alignSelf: 'flex-end',
     alignItems: 'center',
     marginHorizontal: 10,

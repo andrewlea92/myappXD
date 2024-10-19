@@ -58,3 +58,14 @@ npm install @react-native-community/slider
 
 # ask ma's packagejson and feed to chatgpt to npm install everything
 ```
+
+
+
+## Used packages (these are the real used packages)
+```
+npm install expo-camera expo-media-library expo-image-manipulator expo-status-bar
+npm install @react-navigation/native @react-navigation/stack
+npm install @react-native-community/slider
+npm install react-native-screens react-native-safe-area-context
+npm install expo-av
+```
