@@ -1,7 +1,9 @@
 const nthu_drom_backend = 'http://192.168.0.104:5000';
 const my_home_backend = 'http://192.168.50.74:5000';
 const ngrok_backend = 'https://on-hamster-prepared.ngrok-free.app';
-const backend_root = ngrok_backend;
+
+const wei_backend = 'http://192.168.240.26:8787';
+const backend_root = wei_backend;
 
 export const generateAiOverlay = async (imageUri, category) => {
   // Function to upload the image to the backend
