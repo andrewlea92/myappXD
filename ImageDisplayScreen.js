@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Image, StyleSheet, TouchableOpacity, Text, ScrollView, Dimensions, ActivityIndicator, Animated } from 'react-native';
 import { generateAiProcessedImage } from './AiApiHandler';
 import { debugProcessedImage, debugMode } from './DebugApiHandler';
+import { PanGestureHandler, State } from 'react-native-gesture-handler';
 
 const { width, height } = Dimensions.get('window');
 
@@ -57,48 +58,57 @@ export default function ImageDisplayScreen({ route, navigation }) {
     navigation.navigate('ProcessedImages', { processedUrls });
   };
 
+  const handleGesture = ({ nativeEvent }) => {
+    if (nativeEvent.state === State.END) {
+      if (nativeEvent.translationX > 50) {
+        navigation.goBack(); // Navigate to the previous screen
+      }
+    }
+  };
+
   return (
-    <View style={styles.background}>
-      <Text style={styles.title}>Image</Text>
-      <ScrollView
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.scrollView}>
-        {(processedUrls.length > 0 ? processedUrls : imageUrls).map((url, index) => (
-          <View key={index} style={styles.imageContainer}>
-            <Image
-              key={index}
-              source={{ uri: url }}
-              style={styles.image}
-            />
-          </View>
-        ))}
-      </ScrollView>
-      <View style={styles.alertContainer}>
-        {showAlert && (
-          <Animated.Text style={{ ...styles.alertText, opacity: fadeAnim }}>AI 修圖完畢!</Animated.Text>
-        )}
-      </View>
-      <View style={styles.toolbar}>
-        <TouchableOpacity style={styles.button} onPress={handleAiEdit}>
-          <Text style={styles.buttonText}>AI 修圖</Text>
-        </TouchableOpacity>
-        {showNextButton && (
-          <TouchableOpacity style={styles.nextStepButton} onPress={handleNextStep}>
-            <Text style={styles.nextStepsText}>下一步</Text>
+    <PanGestureHandler onHandlerStateChange={handleGesture}>
+      <View style={styles.background}>
+        <Text style={styles.title}>Image</Text>
+        <ScrollView
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.scrollView}>
+          {(processedUrls.length > 0 ? processedUrls : imageUrls).map((url, index) => (
+            <View key={index} style={styles.imageContainer}>
+              <Image
+                key={index}
+                source={{ uri: url }}
+                style={styles.image}
+              />
+            </View>
+          ))}
+        </ScrollView>
+        <View style={styles.alertContainer}>
+          {showAlert && (
+            <Animated.Text style={{ ...styles.alertText, opacity: fadeAnim }}>AI 修圖完畢!</Animated.Text>
+          )}
+        </View>
+        <View style={styles.toolbar}>
+          <TouchableOpacity style={styles.button} onPress={handleAiEdit}>
+            <Text style={styles.buttonText}>AI 修圖</Text>
           </TouchableOpacity>
-        )}
-        {loading && (
-          <View style={styles.loadingOverlay}>
-            <ActivityIndicator
+          {showNextButton && (
+            <TouchableOpacity style={styles.nextStepButton} onPress={handleNextStep}>
+              <Text style={styles.nextStepsText}>下一步</Text>
+            </TouchableOpacity>
+          )}
+          {loading && (
+            <View style={styles.loadingOverlay}>
+              <ActivityIndicator
 
-              size="large" color="#0000ff" />
-          </View>
-        )}
-      </View>
-    </View >
-
+                size="large" color="#0000ff" />
+            </View>
+          )}
+        </View>
+      </View >
+    </PanGestureHandler>
   );
 }
 

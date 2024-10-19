@@ -120,7 +120,7 @@ export default function ResultScreen({ route, navigation }) {
             <ScrollView
               horizontal={false}
               contentContainerStyle={styles.aiTextScrollView}>
-              <Text style={styles.aiText}>sjdijijiwjdijwidjwidjiwdjiwjdiw</Text>
+              <Text style={styles.aiText}>{aiText}</Text>
             </ScrollView>
 
             <View style={styles.toolbar}>
