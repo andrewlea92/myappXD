@@ -252,3 +252,41 @@ export const generateAiCaptionWithAudio = async (recordedUrl) => {
 
   return getCaptionFromBackendWithAudio(filePath); // Get the caption from the server
 };
+
+
+export const generateAiCaptionWithAudioAndText = async (storeName, items, review, recordedUrl) => {
+
+  // Function to upload the audio (m4a) to the backend
+  const uploadAudioToBackend = async (audioUri) => {
+    const timestamp = Date.now(); // Get current timestamp
+
+    // Create FormData to send the audio to the backend
+    const formData = new FormData();
+    formData.append('audio', {
+      uri: audioUri, // Audio URI
+      name: `audio_${timestamp}.m4a`, // Use timestamp for the audio name
+      type: 'audio/x-m4a' // MIME type for m4a audio
+    });
+
+    // Send POST request to the Python backend
+    try {
+      const response = await fetch(`${backend_root}/save_audio`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Accept': 'application/json', // Accept header for JSON response
+        }
+      });
+
+      const responseData = await response.json();
+      console.log('Response from server:', responseData);
+      return responseData.file_path; // Return the file path from the response
+    } catch (error) {
+      console.error('Error uploading audio:', error);
+      throw error; // Re-throw error to handle it in the calling function
+    }
+  };
+
+
+  const filePath = await uploadAudioToBackend(recordedUrl); // Upload the audio to the backend
+};
