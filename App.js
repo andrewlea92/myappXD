@@ -1,7 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Camera, CameraView, useCameraPermissions } from 'expo-camera';
-import { Button, StyleSheet, Text, TouchableOpacity, View, Image, ActivityIndicator, Clipboard, TextInput, Modal, ScrollView, Dimensions } from 'react-native';
+import { Button, StyleSheet, Text, TouchableOpacity, View, Image, ActivityIndicator, Vibration, TextInput, Modal, ScrollView, Dimensions } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import * as React from "react";
 import ImageDisplayScreen from './ImageDisplayScreen'; // Import the new screen
@@ -14,7 +14,9 @@ import { debugOverlay, debugMode } from './DebugApiHandler';
 import Slider from '@react-native-community/slider';
 import { PanGestureHandler } from 'react-native-gesture-handler';
 import * as ImageManipulator from 'expo-image-manipulator';
+
 import CoverScreen from './CoverScreen';
+import VibratingButton from './components/VibratingButton'
 
 
 
@@ -169,6 +171,7 @@ function CameraScreen({ navigation }) {
       setTimeout(() => setLoading(true), 250); // Show after blinking effect with delay
       const photo = await cameraRef.current.takePictureAsync();
 
+      setOverlayOpacity(0.5)
       let overlayImages;
       if (debugMode) {
         console.log('Debug mode enabled');
@@ -180,7 +183,6 @@ function CameraScreen({ navigation }) {
       }
 
       setOverlayImages(overlayImages); // Set the overlay image to the first image in the array
-
       setLoading(false);
 
       //! Remove foodInput after overlay generation
@@ -212,7 +214,7 @@ function CameraScreen({ navigation }) {
       <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
 
         {/* 上方灰階遮罩 */}
-        <View style={styles.overlay} >
+        <View style={styles.top_overlay} >
           {/* 放置在上方灰階遮罩中的元素 */}
           <View style={styles.buttonContainer}>
             <Text style={styles.imageCountText}>{imageCount} / 3</Text>
@@ -229,7 +231,7 @@ function CameraScreen({ navigation }) {
         </View>
 
         {/* 下方灰階遮罩 */}
-        <View style={styles.overlay}>
+        <View style={styles.bottom_overlay}>
 
           {/* 底部的點點 */}
           {renderDots()}
@@ -237,7 +239,7 @@ function CameraScreen({ navigation }) {
           {/* 底部的滑動條 */}
           <View style={overlayImages.length ? styles.sliderContainer : styles.hiddenSliderContainer}>
             <View style={styles.sliderRow}>
-              <MaterialIcons name="opacity" size={30} color="white" />
+              <MaterialIcons name="opacity" size={30} color="black" />
               {/* <Text style={styles.sliderLabel}>Overlay Opacity</Text> */}
               <Slider
 
@@ -263,9 +265,13 @@ function CameraScreen({ navigation }) {
             <TouchableOpacity style={styles.circleButton} onPress={takePicture} disabled={loading}>
               <Icon name="camera" size={30} color="white" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.circleButton} onPress={handleAiOverlay} disabled={loading}>
+
+            {/* <TouchableOpacity style={styles.circleButton} onPress={handleAiOverlay} disabled={loading}>
               <Icon name="magic" size={30} color="white" />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
+            
+            {/* This Button Can Vibrate! */}
+            <VibratingButton icon_name={"magic"} size={30} handleFunc={handleAiOverlay} disabled={loading} />
           </View>
         </View>
 
@@ -342,11 +348,17 @@ const styles = StyleSheet.create({
     height: 0,
     opacity: 0,
   },
-  overlay: {
+  top_overlay: {
     width: '100%',
-    height: (height - width) / 2, // 調整上方和下方的灰階遮罩高度
-    backgroundColor: '#808080',
-    opacity: 0.7,
+    height: (height - width) / 2 - 40, // 調整上方和下方的灰階遮罩高度
+    backgroundColor: 'white',
+    opacity: 1,
+  },
+  bottom_overlay: {
+    width: '100%',
+    height: (height - width) / 2 + 40, // 調整上方和下方的灰階遮罩高度
+    backgroundColor: 'white',
+    opacity: 1,
   },
   squareFocusArea: {
     width: '100%',
@@ -354,7 +366,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     // borderColor: 'white',
-    // borderWidth: 2,
+    // borderWidth: '10%',
   },
   buttonContainer: {
     flex: 1,
@@ -385,11 +397,11 @@ const styles = StyleSheet.create({
   },
   imageCountText: {
     position: 'absolute',
-    top: 10,
-    left: 10,
+    top: '45%',
+    left: '5%',
     fontSize: 36,
     fontWeight: 'bold',
-    color: 'white',
+    color: 'black',
   },
   loadingIndicator: {
     position: 'absolute',
@@ -464,8 +476,8 @@ const styles = StyleSheet.create({
   },
   openModalButton: {
     position: 'absolute',
-    top: 10,
-    right: 10,
+    top: '40%',
+    right: '5%',
     width: 50,
     height: 50,
     borderRadius: 25,
@@ -534,10 +546,10 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   activeDot: {
-    backgroundColor: 'white',
+    backgroundColor: 'black',
   },
   inactiveDot: {
-    backgroundColor: 'black',
+    backgroundColor: '#D3D3D3',
   },
   scrollView: {
     flexDirection: 'row',
