@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Image, StyleSheet, TextInput, ScrollView, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Image, StyleSheet, TextInput, ScrollView, Text, TouchableOpacity, ActivityIndicator, Modal } from 'react-native';
 import { generateAiCaption, generateAiCaptionWithAudio } from './AiApiHandler';
 import { debugCaption, debugCaptionWithAudio, debugMode } from './DebugApiHandler';
 import { Audio } from 'expo-av';
@@ -16,6 +16,12 @@ export default function ProcessedImagesScreen({ route, navigation }) {
   const [recordedUrl, setRecordedUrl] = useState();
   const [permissionResponse, requestPermission] = Audio.usePermissions();
   const [isRecordingMode, setIsRecordingMode] = useState(false); // 新增狀態來控制錄音或手動輸入
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+
+  const toggleModal = () => {
+    setIsModalVisible(!isModalVisible);
+  };
 
   const handleAiTextWithHint = async () => {
     setLoading(true);
@@ -29,6 +35,7 @@ export default function ProcessedImagesScreen({ route, navigation }) {
 
     setAiText(generatedText);
     setLoading(false);
+    setIsModalVisible(false); // Close the modal after generating AI text
     console.log('AI 文案 button pressed');
   };
 
@@ -67,8 +74,8 @@ export default function ProcessedImagesScreen({ route, navigation }) {
     const uri = recording.getURI();
     console.log('Recording stopped and stored at', uri);
     setRecordedUrl(uri);
-    const { sound } = await Audio.Sound.createAsync({ uri });
-    await sound.playAsync();
+    // const { sound } = await Audio.Sound.createAsync({ uri });
+    // await sound.playAsync();
   }
 
   async function replayRecording() {
@@ -96,56 +103,81 @@ export default function ProcessedImagesScreen({ route, navigation }) {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {processedUrls.map((url, index) => (
-        <View key={index} style={styles.imageContainer}>
-          <Image source={{ uri: url }} style={styles.image} />
-        </View>
-      ))}
-      
-      {/* 新增選擇模式的按鈕 */}
-      <View style={styles.buttonContainer}>
+  <ScrollView contentContainerStyle={styles.container}>
+    {processedUrls.map((url, index) => (
+      <View key={index} style={styles.imageContainer}>
+        <Image source={{ uri: url }} style={styles.image} />
+      </View>
+    ))}
+
+    {/* 新增選擇模式的按鈕 */}
+    {/* <View style={styles.buttonContainer}>
       <TouchableOpacity style={[styles.button, styles.buttonMargin]} onPress={() => setIsRecordingMode(true)}>
         <Text style={styles.buttonText}>錄音</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={[styles.button, styles.buttonMargin]} onPress={() => setIsRecordingMode(false)}>
+      <TouchableOpacity style={[styles.button, styles.buttonMargin]} onPress={toggleModal}>
         <Text style={styles.buttonText}>手動輸入</Text>
       </TouchableOpacity>
-      </View>
+    </View> */}
 
-      {isRecordingMode ? (
-        // 錄音模式的按鈕
-        <>
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.circleButton} onPress={recording ? stopRecording : startRecording}>
-              <Icon name={recording ? 'stop' : 'microphone'} size={30} color={recording ? 'red' : 'green'} />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.circleButton} onPress={replayRecording}>
-              <Icon name="repeat" size={30} color="white"/>
-            </TouchableOpacity>
-          </View>
-          <TouchableOpacity style={styles.button} onPress={handleAiTextWithAudio}>
-            <Text style={styles.buttonText}>錄音檔生成 AI 文案</Text>
-          </TouchableOpacity>
-        </>
-      ) : (
-        // 手動輸入模式的輸入框
-        <>
+    <View style={styles.buttonContainer}>
+      <TouchableOpacity style={styles.circleButton} onPress={recording ? stopRecording : startRecording}>
+        <Icon name={recording ? 'stop' : 'microphone'} size={30} color={recording ? 'red' : 'green'} />
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.circleButton} onPress={replayRecording}>
+        <Icon name="repeat" size={30} color="white"/>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.circleButton} onPress={handleAiTextWithAudio}>
+        <Image
+          source={require('./assets/Gemini_icon.png')} // Update the path to your custom icon file
+          style={styles.customIcon}
+        />
+      </TouchableOpacity>
+    </View>
+    {/* <TouchableOpacity style={styles.button} onPress={handleAiTextWithAudio}>
+      <Text style={styles.buttonText}>錄音檔生成 AI 文案</Text>
+    </TouchableOpacity> */}
+
+
+    <View style={styles.aiTextBox}>
+      <Text style={styles.aiText}>{aiText || 'AI 文案將顯示在這裡'}</Text>
+    </View>
+    <View style={styles.buttonContainer}>
+      <TouchableOpacity style={styles.circleButton} onPress={toggleModal}>
+        <Icon name="comment-o" size={30} color="white"/>
+      </TouchableOpacity>
+    </View>
+    <TouchableOpacity style={styles.button} onPress={handleNextStep}>
+      <Text style={styles.buttonText}>下一步</Text>
+    </TouchableOpacity>
+
+    {/* Modal for manual input */}
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={isModalVisible}
+      onRequestClose={toggleModal}
+    >
+      <View style={styles.modalContainer}>
+        <View style={styles.modalView}>
           <TextInput
             style={styles.input}
             placeholder="輸入店名"
+            placeholderTextColor="#999" // Ensure placeholder text color is set
             value={storeName}
             onChangeText={setStoreName}
           />
           <TextInput
             style={styles.input}
             placeholder="輸入商品"
+            placeholderTextColor="#999" // Ensure placeholder text color is set
             value={items}
             onChangeText={setItems}
           />
           <TextInput
             style={styles.input}
             placeholder="輸入評論"
+            placeholderTextColor="#999" // Ensure placeholder text color is set
             value={review}
             onChangeText={setReview}
           />
@@ -155,17 +187,14 @@ export default function ProcessedImagesScreen({ route, navigation }) {
               <Text style={styles.buttonText}>生成 AI 文案</Text>
             </TouchableOpacity>
           </View>
-        </>
-      )}
-
-      <View style={styles.aiTextBox}>
-        <Text style={styles.aiText}>{aiText || 'AI 文案將顯示在這裡'}</Text>
+          <TouchableOpacity style={styles.button} onPress={toggleModal}>
+            <Text style={styles.buttonText}>關閉</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-      <TouchableOpacity style={styles.button} onPress={handleNextStep}>
-        <Text style={styles.buttonText}>下一步</Text>
-      </TouchableOpacity>
-    </ScrollView>
-  );
+    </Modal>
+  </ScrollView>
+);
 }
 
 const styles = StyleSheet.create({
@@ -240,5 +269,40 @@ const styles = StyleSheet.create({
   aiText: {
     fontSize: 16,
     color: 'black',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalView: {
+    width: '80%',
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  input: {
+    width: '100%',
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginBottom: 10,
+    color: '#000', // Ensure text color is set
+  },
+  customIcon: {
+    width: 30,
+    height: 30,
   },
 });

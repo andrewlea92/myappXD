@@ -223,7 +223,7 @@ function CameraScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <PanGestureHandler onGestureEvent={handleGesture}>
+      
         <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
 
           {/* 上方灰階遮罩 */}
@@ -237,12 +237,14 @@ function CameraScreen({ navigation }) {
             </View>
           </View>
 
+          <PanGestureHandler onGestureEvent={handleGesture}>
           {/* 中間正方形可視區域 */}
           <View style={styles.squareFocusArea}>
             {renderOverlayImages()}
             
             
           </View>
+          </PanGestureHandler>
 
           {/* 下方灰階遮罩 */}
           <View style={styles.overlay}>
@@ -278,7 +280,6 @@ function CameraScreen({ navigation }) {
           </View>
 
         </CameraView>
-      </PanGestureHandler>
 
       {loading && <ActivityIndicator size="large" color="#000" style={styles.loadingIndicator} />}
 
