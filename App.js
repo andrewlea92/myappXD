@@ -1,7 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Camera, CameraView, useCameraPermissions } from 'expo-camera';
-import { Button, StyleSheet, Text, TouchableOpacity, View, Image, ActivityIndicator, Clipboard, TextInput, Modal , ScrollView, Dimensions } from 'react-native';
+import { Button, StyleSheet, Text, TouchableOpacity, View, Image, ActivityIndicator, Clipboard, TextInput, Modal, ScrollView, Dimensions } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import * as React from "react";
 import ImageDisplayScreen from './ImageDisplayScreen'; // Import the new screen
@@ -9,10 +9,11 @@ import ProcessedImagesScreen from './ProcessedImagesScreen';
 import ResultScreen from './ResultScreen';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { generateAiOverlay } from './AiApiHandler';
-import { debugOverlay , debugMode } from './DebugApiHandler';
+import { debugOverlay, debugMode } from './DebugApiHandler';
 import Slider from '@react-native-community/slider';
 import { PanGestureHandler } from 'react-native-gesture-handler';
 import * as ImageManipulator from 'expo-image-manipulator';
+import CoverScreen from './CoverScreen';
 
 
 
@@ -46,7 +47,7 @@ function CameraScreen({ navigation }) {
       if (deltaX > 10) {
         cycleOverlayImage();
         setSwipeStartX(null); // 重置起始點
-      } 
+      }
       // 左滑動可加入其他功能，例如回到前一張圖片
       else if (deltaX < -10) {
         // 左滑可以加入其它功能，比如回到前一张图片
@@ -101,7 +102,7 @@ function CameraScreen({ navigation }) {
   const openModal = () => {
     setIsModalVisible(true);
   };
-  
+
   const closeModal = () => {
     setIsModalVisible(false);
   };
@@ -115,17 +116,17 @@ function CameraScreen({ navigation }) {
   const renderOverlayImages = () => {
     if (overlayImages.length > 0 && shownOverlayImageIdx < overlayImages.length) {
       return (
-          <Image
-            source={overlayImages[shownOverlayImageIdx]}
-            style={[styles.overlayImage, { opacity: overlayOpacity }]}
-            resizeMode="contain"
-            pointerEvents="none" // This ensures that the image doesn't block interactions
-          />
+        <Image
+          source={overlayImages[shownOverlayImageIdx]}
+          style={[styles.overlayImage, { opacity: overlayOpacity }]}
+          resizeMode="contain"
+          pointerEvents="none" // This ensures that the image doesn't block interactions
+        />
       );
     }
     return <Image style={styles.emptyOverlayImage} />;
   };
-  
+
 
   function toggleCameraFacing() {
     setFacing(current => (current === 'back' ? 'front' : 'back'));
@@ -138,11 +139,11 @@ function CameraScreen({ navigation }) {
         const photo = await cameraRef.current.takePictureAsync();
         const squareSize = photo.width; // 使用拍攝的照片寬度作為裁剪大小
         const { uri, width, height } = photo;
-  
+
         // 計算裁剪的起始點，確保不超出邊界
         const originX = Math.max(0, (width - squareSize) / 2);
         const originY = Math.max(0, (height - squareSize) / 2);
-  
+
         // 使用 ImageManipulator 進行裁剪
         const croppedImage = await ImageManipulator.manipulateAsync(
           uri,
@@ -167,27 +168,27 @@ function CameraScreen({ navigation }) {
       }
     }
   };
-  
-  
-  
+
+
+
 
   const handleAiOverlay = async () => {
     if (cameraRef.current) {
       setTimeout(() => setLoading(true), 250); // Show after blinking effect with delay
       const photo = await cameraRef.current.takePictureAsync();
-      
+
       let overlayImages;
       if (debugMode) {
         console.log('Debug mode enabled');
         overlayImages = await debugOverlay(photo.uri, foodInput);
-        
+
       } else {
         // Call generateAiOverlay with the photo URI
         overlayImages = await generateAiOverlay(photo.uri, foodInput);
       }
-  
+
       setOverlayImages(overlayImages); // Set the overlay image to the first image in the array
-  
+
       setLoading(false);
 
       //! Remove foodInput after overlay generation
@@ -209,7 +210,7 @@ function CameraScreen({ navigation }) {
             <View style={styles.buttonContainer}>
               <Text style={styles.imageCountText}>{imageCount} / 3</Text>
               <TouchableOpacity style={styles.openModalButton} onPress={openModal}>
-                <Icon name="lightbulb-o" size={30} color="white"/>
+                <Icon name="lightbulb-o" size={30} color="white" />
               </TouchableOpacity>
             </View>
           </View>
@@ -234,8 +235,8 @@ function CameraScreen({ navigation }) {
                 value={overlayOpacity}
                 onValueChange={setOverlayOpacity}
                 minimumTrackTintColor="#000"
-                maximumTrackTintColor="#ccc" 
-                thumbTintColor="#fff" 
+                maximumTrackTintColor="#ccc"
+                thumbTintColor="#fff"
               />
             </View>
 
@@ -256,7 +257,7 @@ function CameraScreen({ navigation }) {
         </CameraView>
       </PanGestureHandler>
 
-      {loading && <ActivityIndicator size="large" color="#000" style={styles.loadingIndicator}/>}
+      {loading && <ActivityIndicator size="large" color="#000" style={styles.loadingIndicator} />}
 
       {/* 彈出式視窗 */}
       <Modal
@@ -289,14 +290,15 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="Camera"
+        initialRouteName="Cover"
         screenOptions={{
           headerStyle: { backgroundColor: '#000' }, // 設置標題欄背景顏色
           headerTintColor: '#fff', // 設置標題文字顏色
           headerTitleStyle: { fontWeight: 'bold' }, // 設置標題文字樣式
         }}
       >
-        <Stack.Screen name="Camera" component={CameraScreen} options={{ headerShown: false }}/>
+        <Stack.Screen name="Cover" component={CoverScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Camera" component={CameraScreen} options={{ headerShown: false }} />
         <Stack.Screen name="ImageDisplay" component={ImageDisplayScreen} />
         <Stack.Screen name="ProcessedImages" component={ProcessedImagesScreen} />
         <Stack.Screen name="Result" component={ResultScreen} />
@@ -329,7 +331,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     width: '100%',
-    height: (height-width)/2, // 調整上方和下方的灰階遮罩高度
+    height: (height - width) / 2, // 調整上方和下方的灰階遮罩高度
     backgroundColor: '#808080',
     opacity: 0.7,
   },
@@ -436,7 +438,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     backgroundColor: '#000',
     justifyContent: 'center',
-    alignItems: 'center',    
+    alignItems: 'center',
     alignSelf: 'flex-end',
     alignItems: 'center',
     marginHorizontal: 10,
