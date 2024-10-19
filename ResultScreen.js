@@ -86,7 +86,7 @@ export default function ResultScreen({ route, navigation }) {
         <ScrollView
           pagingEnabled
           contentContainerStyle={styles.allScrollView}>
-          <View style={{ height: '50%', width: '100%' }}>
+          <View style={{ height: '50%', width: '100%', alignItems: 'center' }}>
             <Text style={styles.title}>Image</Text>
             <ScrollView
               horizontal
@@ -112,6 +112,7 @@ export default function ResultScreen({ route, navigation }) {
                 <Icon name="download" size={30} color="white" />
               </TouchableOpacity>
             </View>
+            <Image source={require('./assets/arrow.png')} style={{ width: 60, height: 60, bottom: '3%' }} />
           </View>
 
           {/* // this is the text part */}
@@ -186,10 +187,11 @@ const styles = StyleSheet.create({
     borderRadius: 15
   },
   toolbar: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     justifyContent: 'space-around',
     alignItems: 'center',
     height: '20%',
+    width: '100%',
     marginBottom: '20%'
   },
   button: {
@@ -227,6 +229,7 @@ const styles = StyleSheet.create({
   circleButton: {
     width: 60,
     height: 60,
+    bottom: '20%',
     borderRadius: 30,
     backgroundColor: '#000',
     justifyContent: 'center',
