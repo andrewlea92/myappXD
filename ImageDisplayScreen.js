@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Image, StyleSheet, TouchableOpacity, Text, ScrollView, Dimensions } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Image, StyleSheet, TouchableOpacity, Text, ScrollView, Dimensions, ActivityIndicator, Animated } from 'react-native';
 import { generateAiProcessedImage } from './AiApiHandler';
 import { debugProcessedImage, debugMode } from './DebugApiHandler';
 
@@ -10,9 +10,32 @@ export default function ImageDisplayScreen({ route, navigation }) {
   const [processedUrls, setProcessedUrls] = useState([]);
   const [showNextButton, setShowNextButton] = useState(false);
   const [showAlert, setShowAlert] = useState(false); // Add state for alert
+  const [loading, setLoading] = useState(false);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
+
+  useEffect(() => {
+    if (showAlert) {
+      // Fade in
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }).start(() => {
+        // Fade out after 3 seconds
+        setTimeout(() => {
+          Animated.timing(fadeAnim, {
+            toValue: 0,
+            duration: 500,
+            useNativeDriver: true,
+          }).start(() => setShowAlert(false));
+        }, 3000);
+      });
+    }
+  }, [showAlert]);
   const handleAiEdit = async () => {
     console.log("imageUrls", imageUrls);
+    setLoading(true);
     let processed = [];
     // Simulate uploading images to an external API and receiving processed images
     if (debugMode) {
@@ -25,12 +48,7 @@ export default function ImageDisplayScreen({ route, navigation }) {
     setProcessedUrls(processed);
     setShowNextButton(true);
     setShowAlert(true); // Show alert
-
-    // Hide alert after 3 seconds
-    setTimeout(() => {
-      setShowAlert(false);
-    }, 1500);
-
+    setLoading(false);
     console.log('AI 修圖 button pressed');
   };
 
@@ -40,7 +58,8 @@ export default function ImageDisplayScreen({ route, navigation }) {
   };
 
   return (
-    <View>
+    <View style={styles.background}>
+      <Text style={styles.title}>Image</Text>
       <ScrollView
         horizontal
         pagingEnabled
@@ -55,34 +74,71 @@ export default function ImageDisplayScreen({ route, navigation }) {
             />
           </View>
         ))}
-        {showAlert && (
-          <View style={styles.alertContainer}>
-            <Text style={styles.alertText}>AI 修圖完畢!</Text>
-          </View>
-        )}
-        {showNextButton && (
-          <TouchableOpacity style={styles.button} onPress={handleNextStep}>
-            <Text style={styles.buttonText}>下一步</Text>
-          </TouchableOpacity>
-        )}
       </ScrollView>
+      <View style={styles.alertContainer}>
+        {showAlert && (
+          <Animated.Text style={{ ...styles.alertText, opacity: fadeAnim }}>AI 修圖完畢!</Animated.Text>
+        )}
+      </View>
       <View style={styles.toolbar}>
         <TouchableOpacity style={styles.button} onPress={handleAiEdit}>
           <Text style={styles.buttonText}>AI 修圖</Text>
         </TouchableOpacity>
+        {showNextButton && (
+          <TouchableOpacity style={styles.nextStepButton} onPress={handleNextStep}>
+            <Text style={styles.nextStepsText}>下一步</Text>
+          </TouchableOpacity>
+        )}
+        {loading && (
+          <View style={styles.loadingOverlay}>
+            <ActivityIndicator
+
+              size="large" color="#0000ff" />
+          </View>
+        )}
       </View>
-    </View>
+    </View >
 
   );
 }
 
 const styles = StyleSheet.create({
+  background: {
+    width: width,
+    height: height,
+    color: 'white'
+  },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: '15%',
+    height: '10%',
+    width: '100%',
+  },
+  title: {
+    fontSize: 25,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: 'black',
+    marginTop: '20%',
+  },
+  backButton: {
+    left: '25%',
+    height: '75%',
+    width: '10%',
+  },
+  backImage: {
+    height: '50%',
+    width: '100%'
+  },
   scrollView: {
     flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: 50,
+    paddingTop: '5%',
+    paddingBottom: '5%',
     width: width * 3,
+    height: '100%',
   },
   imageContainer: {
     alignItems: 'center',
@@ -93,7 +149,8 @@ const styles = StyleSheet.create({
   },
   image: {
     width: '100%',
-    height: '75%',
+    height: '100%',
+    borderRadius: 15
   },
   urlText: {
     marginTop: 5,
@@ -101,36 +158,57 @@ const styles = StyleSheet.create({
     color: 'gray',
   },
   toolbar: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alighItems: 'center',
-    backgroundColor: '#FFF',
-    height: '15%',
-    marginBottom: '10%',
+    flexDirection: 'column',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    height: '20%',
+    marginBottom: '20%'
   },
   button: {
-    backgroundColor: '#007AFF',
-    borderRadius: 5,
+    backgroundColor: 'black',
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: '3%',
-    width: '30%',
-    height: '75%'
+    width: '90%',
+    height: '40%'
+  },
+  nextStepButton: {
+    backgroundColor: 'transparent',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '90%',
+    height: '40%'
   },
   buttonText: {
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
   },
+  nextStepsText: {
+    color: 'black',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
   alertContainer: {
-    marginTop: 20,
-    padding: 10,
-    backgroundColor: '#FFD700',
-    borderRadius: 5,
+    height: '10%',
+    backgroundColor: 'transparent',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   alertText: {
     color: 'black',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Slight gray background
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
