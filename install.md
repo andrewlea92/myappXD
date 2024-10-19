@@ -68,4 +68,7 @@ npm install @react-navigation/native @react-navigation/stack
 npm install @react-native-community/slider
 npm install react-native-screens react-native-safe-area-context
 npm install expo-av
+
+// 2024-10-19 14:00 update
+npm install react-native-ratings
 ```
