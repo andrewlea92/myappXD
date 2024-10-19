@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
-import { View, Image, StyleSheet, TextInput, ScrollView, Text, TouchableOpacity, ActivityIndicator, Modal } from 'react-native';
+import React, { useState,  useEffect } from 'react';
+import { View, Image, StyleSheet, TextInput, ScrollView, Text, TouchableOpacity, ActivityIndicator, Modal , Dimensions } from 'react-native';
 import { Rating, AirbnbRating } from 'react-native-ratings';
 import { generateAiCaption, generateAiCaptionWithAudio } from './AiApiHandler';
 import { debugCaption, debugCaptionWithAudio, debugMode } from './DebugApiHandler';
 import { Audio } from 'expo-av';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import CustomRating from './components/rating'
+
+const { width, height } = Dimensions.get('window');
 
 export default function ProcessedImagesScreen({ route, navigation }) {
   const { processedUrls } = route.params;
@@ -52,21 +54,34 @@ export default function ProcessedImagesScreen({ route, navigation }) {
 
   const handleAiTextWithHint = async () => {
     setLoading(true);
-
+  
     let generatedText;
     if (debugMode) {
       generatedText = await debugCaption(storeName, items, review);
     } else {
       generatedText = await generateAiCaption(storeName, items, review);
     }
-
+  
     setAiText(generatedText);
     setLoading(false);
     setIsModalVisible(false); // Close the modal after generating AI text
     console.log('AI 文案 button pressed');
   };
 
+  useEffect(() => {
+    if (aiText) {
+      console.log('aitext:', aiText);
+      handleNextStep(); // This will run after aiText has been updated
+    }
+  }, [aiText]);
+
+  useEffect(() => {
+    console.log('Resetting recording..');
+    setIsRecordingComplete(false);
+  }, []);
+
   const handleNextStep = () => {
+    setIsRecordingComplete(false);
     navigation.navigate('Result', { processedUrls, aiText });
     console.log('下一步 button pressed');
   };
@@ -159,102 +174,122 @@ export default function ProcessedImagesScreen({ route, navigation }) {
   };
 
   return (
-  <ScrollView contentContainerStyle={styles.container}>
-    {processedUrls.map((url, index) => (
-      <View key={index} style={styles.imageContainer}>
-        <Image source={{ uri: url }} style={styles.image} />
+  <View style={styles.background}>
+    <Text style={styles.title}>Processed</Text>
+    <ScrollView contentContainerStyle={styles.container}>
+      {/* {processedUrls.map((url, index) => (
+        <View key={index} style={styles.imageContainer}>
+          <Image source={{ uri: url }} style={styles.image} />
+        </View>
+      ))} */}
+        <ScrollView
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.scrollView}
+        >
+          {(processedUrls.length > 0 ? processedUrls : imageUrls).map((url, index) => (
+            <View key={index} style={styles.imageContainer}>
+              <Image
+                key={index}
+                source={{ uri: url }}
+                style={styles.image}
+              />
+            </View>
+          ))}
+        </ScrollView>
+
+
+      <View style={styles.buttonContainer}>
+        {!isRecordingComplete ? (
+          <TouchableOpacity style={styles.circleButton} onPress={recording ? stopRecording : startRecording}>
+            <Icon name={recording ? 'stop' : 'microphone'} size={30} color={recording ? 'red' : 'green'} />
+          </TouchableOpacity>
+        ) : (
+          <>
+            <TouchableOpacity style={styles.circleButton} onPress={replayRecording}>
+              <Icon name={isPlaying ? 'pause' : 'play'} size={30} color="white" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.circleButton} onPress={resetRecording}>
+              <Icon name="trash-o" size={30} color="white"/>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.circleButton} onPress={handleAiTextWithAudio}>
+              <Image
+                source={require('./assets/Gemini_icon.png')} // Update the path to your custom icon file
+                style={styles.customIcon}
+              />
+            </TouchableOpacity>
+          </>
+        )}
       </View>
-    ))}
 
-    <View style={styles.buttonContainer}>
-      {!isRecordingComplete ? (
-        <TouchableOpacity style={styles.circleButton} onPress={recording ? stopRecording : startRecording}>
-          <Icon name={recording ? 'stop' : 'microphone'} size={30} color={recording ? 'red' : 'green'} />
+      {/* 評分系統 */}
+      <View style={styles.rateContainer}>
+        <CustomRating title={'口味'} setRating={handleTasteRating}/>
+        <CustomRating title={'價格'} setRating={handleMoneyRating}/>
+        <CustomRating title={'環境'} setRating={handleEnvRating}/>
+        {/* <Text style={styles.buttonText}>{tasteRating}</Text>
+        <Text style={styles.buttonText}>{moneyRating}</Text>
+        <Text style={styles.buttonText}>{envRating}</Text> */}
+      </View>
+
+
+      {/* <View style={styles.aiTextBox}>
+        <Text style={styles.aiText}>{aiText || 'AI 文案將顯示在這裡'}</Text>
+      </View> */}
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.circleButton} onPress={toggleModal}>
+          <Icon name="comment-o" size={30} color="white"/>
         </TouchableOpacity>
-      ) : (
-        <>
-          <TouchableOpacity style={styles.circleButton} onPress={replayRecording}>
-            <Icon name={isPlaying ? 'pause' : 'play'} size={30} color="white" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.circleButton} onPress={resetRecording}>
-            <Icon name="trash-o" size={30} color="white"/>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.circleButton} onPress={handleAiTextWithAudio}>
-            <Image
-              source={require('./assets/Gemini_icon.png')} // Update the path to your custom icon file
-              style={styles.customIcon}
+      </View>
+      {/* <TouchableOpacity style={styles.button} onPress={handleNextStep}>
+        <Text style={styles.buttonText}>下一步</Text>
+      </TouchableOpacity> */}
+
+      {/* Modal for manual input */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isModalVisible}
+        onRequestClose={toggleModal}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalView}>
+            <TextInput
+              style={styles.input}
+              placeholder="輸入店名"
+              placeholderTextColor="#999" // Ensure placeholder text color is set
+              value={storeName}
+              onChangeText={setStoreName}
             />
-          </TouchableOpacity>
-        </>
-      )}
-    </View>
-
-    {/* 評分系統 */}
-    <View style={styles.rateContainer}>
-      <CustomRating title={'口味'} setRating={handleTasteRating}/>
-      <CustomRating title={'價格'} setRating={handleMoneyRating}/>
-      <CustomRating title={'環境'} setRating={handleEnvRating}/>
-      {/* <Text style={styles.buttonText}>{tasteRating}</Text>
-      <Text style={styles.buttonText}>{moneyRating}</Text>
-      <Text style={styles.buttonText}>{envRating}</Text> */}
-    </View>
-
-
-    <View style={styles.aiTextBox}>
-      <Text style={styles.aiText}>{aiText || 'AI 文案將顯示在這裡'}</Text>
-    </View>
-    <View style={styles.buttonContainer}>
-      <TouchableOpacity style={styles.circleButton} onPress={toggleModal}>
-        <Icon name="comment-o" size={30} color="white"/>
-      </TouchableOpacity>
-    </View>
-    <TouchableOpacity style={styles.button} onPress={handleNextStep}>
-      <Text style={styles.buttonText}>下一步</Text>
-    </TouchableOpacity>
-
-    {/* Modal for manual input */}
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={isModalVisible}
-      onRequestClose={toggleModal}
-    >
-      <View style={styles.modalContainer}>
-        <View style={styles.modalView}>
-          <TextInput
-            style={styles.input}
-            placeholder="輸入店名"
-            placeholderTextColor="#999" // Ensure placeholder text color is set
-            value={storeName}
-            onChangeText={setStoreName}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="輸入商品"
-            placeholderTextColor="#999" // Ensure placeholder text color is set
-            value={items}
-            onChangeText={setItems}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="輸入評論"
-            placeholderTextColor="#999" // Ensure placeholder text color is set
-            value={review}
-            onChangeText={setReview}
-          />
-          <View style={styles.buttonContainer}>
-            {loading && <ActivityIndicator size="small" color="#007AFF" style={styles.loadingIndicator} />}
-            <TouchableOpacity style={styles.button} onPress={handleAiTextWithHint} disabled={loading}>
-              <Text style={styles.buttonText}>生成 AI 文案</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="輸入商品"
+              placeholderTextColor="#999" // Ensure placeholder text color is set
+              value={items}
+              onChangeText={setItems}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="輸入評論"
+              placeholderTextColor="#999" // Ensure placeholder text color is set
+              value={review}
+              onChangeText={setReview}
+            />
+            <View style={styles.buttonContainer}>
+              {loading && <ActivityIndicator size="small" color="#007AFF" style={styles.loadingIndicator} />}
+              <TouchableOpacity style={styles.button} onPress={handleAiTextWithHint} disabled={loading}>
+                <Text style={styles.buttonText}>生成 AI 文案</Text>
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity style={styles.button} onPress={toggleModal}>
+              <Text style={styles.buttonText}>關閉</Text>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.button} onPress={toggleModal}>
-            <Text style={styles.buttonText}>關閉</Text>
-          </TouchableOpacity>
         </View>
-      </View>
-    </Modal>
-  </ScrollView>
+      </Modal>
+    </ScrollView>
+  </View>
 );
 }
 
@@ -263,16 +298,16 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    // padding: 20,
   },
-  imageContainer: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  image: {
-    width: 250,
-    height: 250,
-  },
+  // imageContainer: {
+  //   alignItems: 'center',
+  //   marginBottom: 20,
+  // },
+  // image: {
+  //   width: 250,
+  //   height: 250,
+  // },
   urlText: {
     marginTop: 5,
     fontSize: 12,
@@ -372,5 +407,33 @@ const styles = StyleSheet.create({
   customIcon: {
     width: 30,
     height: 30,
+  },
+  title: {
+    fontSize: 25,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: 'black',
+    marginTop: '20%',
+  },
+  scrollView: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: '5%',
+    paddingBottom: '5%',
+    width: width * 3,
+    height: '100%',
+  },
+  imageContainer: {
+    alignItems: 'center',
+    width: width,
+    height: '100%',
+    paddingLeft: 10,
+    paddingRight: 10,
+  },
+  image: {
+    width: width-20,
+    height: width-20,
+    borderRadius: 15
   },
 });

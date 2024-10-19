@@ -222,13 +222,13 @@ function CameraScreen({ navigation }) {
           </View>
         </View>
 
-        <PanGestureHandler onGestureEvent={handleGesture}>
+        {/* <PanGestureHandler onGestureEvent={handleGesture}> */}
           {/* 中間正方形可視區域 */}
           <View style={styles.squareFocusArea}>
             {loading && <ActivityIndicator size="large" color="#000" style={styles.loadingIndicator} />}
             {renderOverlayImages()}
           </View>
-        </PanGestureHandler>
+        {/* </PanGestureHandler> */}
 
         {/* 下方灰階遮罩 */}
         <View style={styles.overlay}>
@@ -316,8 +316,8 @@ export default function App() {
         <Stack.Screen name="Cover" component={CoverScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Camera" component={CameraScreen} options={{ headerShown: false }} />
         <Stack.Screen name="ImageDisplay" component={ImageDisplayScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="ProcessedImages" component={ProcessedImagesScreen} />
-        <Stack.Screen name="Result" component={ResultScreen} />
+        <Stack.Screen name="ProcessedImages" component={ProcessedImagesScreen} options={{ headerShown: false }}/>
+        <Stack.Screen name="Result" component={ResultScreen} options={{ headerShown: false }}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
