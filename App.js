@@ -31,7 +31,7 @@ function CameraScreen({ navigation }) {
   const [loading, setLoading] = React.useState(false);
   const [overlayImages, setOverlayImages] = React.useState([]);
   const [shownOverlayImageIdx, setShownOverlayImageIdx] = React.useState(0); // State to manage the shown overlay image index
-  const [overlayOpacity, setOverlayOpacity] = React.useState(1); // State to control overlay opacity
+  const [overlayOpacity, setOverlayOpacity] = React.useState(0.5); // State to control overlay opacity
   const [foodInput, setFoodInput] = React.useState(''); // State to manage food input
   const [isModalVisible, setIsModalVisible] = React.useState(false); // 管理彈窗狀態
   const [swipeStartX, setSwipeStartX] = React.useState(null);
@@ -189,6 +189,10 @@ function CameraScreen({ navigation }) {
       setOverlayImages(overlayImages); // Set the overlay image to the first image in the array
   
       setLoading(false);
+
+      //! Remove foodInput after overlay generation
+      setFoodInput("")
+
       console.log('AI 覆蓋 button pressed');
     }
   };
@@ -213,6 +217,13 @@ function CameraScreen({ navigation }) {
           {/* 中間正方形可視區域 */}
           <View style={styles.squareFocusArea}>
             {renderOverlayImages()}
+            
+            
+          </View>
+
+          {/* 下方灰階遮罩 */}
+          <View style={styles.overlay}>
+
             {/* 底部的滑動條 */}
             <View style={styles.sliderContainer}>
               <Text style={styles.sliderLabel}>Overlay Opacity</Text>
@@ -227,10 +238,7 @@ function CameraScreen({ navigation }) {
                 thumbTintColor="#fff" 
               />
             </View>
-          </View>
 
-          {/* 下方灰階遮罩 */}
-          <View style={styles.overlay}>
             {/* 放置在下方灰階遮罩中的按鈕 */}
             <View style={styles.buttonContainer}>
               <TouchableOpacity style={styles.circleButton} onPress={toggleCameraFacing}>
@@ -376,10 +384,14 @@ const styles = StyleSheet.create({
   },
   sliderContainer: {
     position: 'absolute',
-    top: '50%',
-    right: 50, // 將 right 屬性調整為 10，向左移動
-    transform: [{ rotate: '-90deg' }, { translateY: -150 }],
-    width: 300,
+    // top: '50%',
+    // right: 50, // 將 right 屬性調整為 10，向左移動
+    // transform: [{ rotate: '-90deg' }, { translateY: -150 }],
+    // width: 300,
+    bottom: '55%',  // 將滑動條放置在距離螢幕底部 30 像素的位置
+    left: '10%',
+    right: 0,    // left 和 right 設置為 0 以使滑動條水平居中
+    width: '80%',  // 設定寬度為 80% 讓滑動條佔據螢幕的 80%
     height: 100,
     justifyContent: 'center',
     padding: 10,

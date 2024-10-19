@@ -1,4 +1,4 @@
-export const debugMode = true; // Set this to true for debug modeconst debugMode = true; // Set this to true for debug mode
+export const debugMode = false; // Set this to true for debug modeconst debugMode = true; // Set this to true for debug mode
 
 const imageMapping = {
   './assets/ig/拉麵_1.jpg': require('./assets/ig/拉麵_1.jpg'),
