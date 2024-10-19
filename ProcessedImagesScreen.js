@@ -81,6 +81,21 @@ const handleAiTextWithHint = async () => {
     generatedText = await generateAiCaption(storeName, items, review);
   }
 
+  start_idx = generatedText.lastIndexOf('-');
+
+  const fullmoon = "🌕";
+  const nomoon = "🌑"
+  
+  format_str = '\n'
+  for (const key in ratings) {
+    if (ratings.hasOwnProperty(key)) {
+      format_str += `${key} ${fullmoon.repeat(ratings[key][0])}${nomoon.repeat(5-ratings[key][0])}\n`
+    }
+  }
+  format_str += '-'
+
+  generatedText = generatedText.substring(0, start_idx+1) + format_str + generatedText.substring(start_idx+1)
+
   setAiText(generatedText);
   setLoading(false);
   setIsModalVisible(false); // Close the modal after generating AI text
@@ -99,11 +114,8 @@ const handleAiTextWithAudio = async () => {
   // print(generatedText)
   start_idx = generatedText.lastIndexOf('-');
 
-  console.log("HI")
   const fullmoon = "🌕";
   const nomoon = "🌑"
-  console.log("HI2", tasteRating, priceRating, envRating)
-  // format_str = `\n口味 ${fullmoon.repeat(tasteRating)}${nomoon.repeat(5-tasteRating)}\n價格 ${fullmoon.repeat(priceRating)}${nomoon.repeat(5-priceRating)}\n環境 ${fullmoon.repeat(envRating)}${nomoon.repeat(5-envRating)}\n-\n`
   
   format_str = '\n'
   for (const key in ratings) {
@@ -114,7 +126,6 @@ const handleAiTextWithAudio = async () => {
   format_str += '-'
 
   generatedText = generatedText.substring(0, start_idx+1) + format_str + generatedText.substring(start_idx+1)
-  console.log(generatedText)
 
   setAiText(generatedText);
   setLoading(false);
