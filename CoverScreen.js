@@ -12,14 +12,14 @@ function CoverScreen({ navigation }) {
     useEffect(() => {
         Animated.timing(fadeAnim, {
             toValue: 1, // Animate to opacity: 1 (fully visible)
-            duration: 1000, // Duration of the animation
+            duration: 750, // Duration of the animation
             useNativeDriver: true, // Use native driver for better performance
         }).start(() => {
             charAnims.forEach((anim, index) => {
                 Animated.timing(anim, {
                     toValue: 1, // Animate to final color
-                    duration: 500, // Duration of the animation
-                    delay: index * 100, // Stagger the animations
+                    duration: 250, // Duration of the animation
+                    delay: index * 50, // Stagger the animations
                     useNativeDriver: false, // Color animation does not support native driver
                 }).start(() => {
                     // Navigate to 'Camera' screen after all animations complete
