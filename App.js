@@ -36,6 +36,7 @@ function CameraScreen({ navigation }) {
   const [foodInput, setFoodInput] = React.useState(''); // State to manage food input
   const [isModalVisible, setIsModalVisible] = React.useState(false); // 管理彈窗狀態
   const [swipeStartX, setSwipeStartX] = React.useState(null);
+  const [isCooldown, setIsCooldown] = React.useState(false);
 
   const handleGesture = (event) => {
     const { translationX } = event.nativeEvent;
@@ -43,15 +44,21 @@ function CameraScreen({ navigation }) {
       setSwipeStartX(translationX);
     } else {
       const deltaX = translationX - swipeStartX;
-      // 右滑動觸發切換下一張圖片
-      if (deltaX > 10) {
-        cycleOverlayImage();
-        setSwipeStartX(null); // 重置起始點
-      }
-      // 左滑動可加入其他功能，例如回到前一張圖片
-      else if (deltaX < -10) {
-        // 左滑可以加入其它功能，比如回到前一张图片
-        setSwipeStartX(null); // 重置起始點
+      if (!isCooldown) {
+        // 右滑動觸發切換下一張圖片
+        if (deltaX > 10) {
+          cycleOverlayImage();
+          setSwipeStartX(null); // 重置起始點
+          setIsCooldown(true);
+          setTimeout(() => setIsCooldown(false), 500); // 1秒cool down
+        }
+        // 左滑動可加入其他功能，例如回到前一張圖片
+        else if (deltaX < -10) {
+          // 左滑可以加入其它功能，比如回到前一张图片
+          setSwipeStartX(null); // 重置起始點
+          setIsCooldown(true);
+          setTimeout(() => setIsCooldown(false), 500); // 1秒cool down
+        }
       }
     }
   };
@@ -198,6 +205,21 @@ function CameraScreen({ navigation }) {
     }
   };
 
+  const renderDots = () => {
+    return (
+      <View style={styles.dotsContainer}>
+        {overlayImages.map((_, index) => (
+          <View
+            key={index}
+            style={[
+              styles.dot,
+              index === shownOverlayImageIdx ? styles.activeDot : styles.inactiveDot,
+            ]}
+          />
+        ))}
+      </View>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -241,6 +263,7 @@ function CameraScreen({ navigation }) {
               />
             </View>
 
+            {renderDots()}
             {/* 放置在下方灰階遮罩中的按鈕 */}
             <View style={styles.buttonContainer}>
               <TouchableOpacity style={styles.circleButton} onPress={toggleCameraFacing}>
@@ -504,5 +527,23 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  dotsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20, // Ensure distance from squareFocusArea
+  },
+  dot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginHorizontal: 5,
+  },
+  activeDot: {
+    backgroundColor: 'white',
+  },
+  inactiveDot: {
+    backgroundColor: 'black',
   },
 });
