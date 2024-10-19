@@ -17,7 +17,6 @@ import * as ImageManipulator from 'expo-image-manipulator';
 
 import CoverScreen from './CoverScreen';
 import VibratingButton from './components/VibratingButton'
-import { Bar } from 'react-native-progress';
 
 
 
@@ -107,6 +106,7 @@ function CameraScreen({ navigation }) {
             <Image
               source={image}
               style={[styles.overlayImage, { opacity: overlayOpacity }]}
+              resizeMode="contain"
               pointerEvents="none" // This ensures that the image doesn't block interactions
             />
           </View>
@@ -216,18 +216,11 @@ function CameraScreen({ navigation }) {
         {/* 上方灰階遮罩 */}
         <View style={styles.top_overlay} >
           {/* 放置在上方灰階遮罩中的元素 */}
-          <View style={styles.upUICaontainer}>
-            <Bar
-              style={{ width: '100%' }}
-              progress={imageCount / 3}
-              width={width}
-              height={10}
-              color='black'
-              borderWidth={5}
-              borderRadius={10}
-              borderColor='black'
-              animationType='spring'
-            />
+          <View style={styles.buttonContainer}>
+            <Text style={styles.imageCountText}>{imageCount} / 3</Text>
+            <TouchableOpacity style={styles.openModalButton} onPress={openModal}>
+              <Icon name="lightbulb-o" size={30} color="white" />
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -265,15 +258,18 @@ function CameraScreen({ navigation }) {
           </View>
 
           {/* 放置在下方灰階遮罩中的按鈕 */}
-          <View style={styles.downUIContainer}>
-            <TouchableOpacity style={styles.circleButton} onPress={openModal}>
-              <Icon name="lightbulb-o" size={30} color="white" />
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.circleButton} onPress={toggleCameraFacing}>
+              <Icon name="refresh" size={30} color="white" />
             </TouchableOpacity>
-
             <TouchableOpacity style={styles.circleButton} onPress={takePicture} disabled={loading}>
               <Icon name="camera" size={30} color="white" />
             </TouchableOpacity>
 
+            {/* <TouchableOpacity style={styles.circleButton} onPress={handleAiOverlay} disabled={loading}>
+              <Icon name="magic" size={30} color="white" />
+            </TouchableOpacity> */}
+            
             {/* This Button Can Vibrate! */}
             <VibratingButton icon_name={"magic"} size={30} handleFunc={handleAiOverlay} disabled={loading} />
           </View>
@@ -324,8 +320,8 @@ export default function App() {
         <Stack.Screen name="Cover" component={CoverScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Camera" component={CameraScreen} options={{ headerShown: false }} />
         <Stack.Screen name="ImageDisplay" component={ImageDisplayScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="ProcessedImages" component={ProcessedImagesScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Result" component={ResultScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="ProcessedImages" component={ProcessedImagesScreen} options={{ headerShown: false }}/>
+        <Stack.Screen name="Result" component={ResultScreen} options={{ headerShown: false }}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -338,10 +334,10 @@ const styles = StyleSheet.create({
   },
   camera: {
     flex: 1,
-
   },
   overlayImage: {
     //position: 'absolute',
+    resizeMode: 'contain',
     width: '100%',
     height: '100%',
     //top: 0,
@@ -357,7 +353,6 @@ const styles = StyleSheet.create({
     height: (height - width) / 2 - 40, // 調整上方和下方的灰階遮罩高度
     backgroundColor: 'white',
     opacity: 1,
-    justifyContent: 'center',
   },
   bottom_overlay: {
     width: '100%',
@@ -370,28 +365,15 @@ const styles = StyleSheet.create({
     height: width, // 中間正方形可視區域
     justifyContent: 'center',
     alignItems: 'center',
-    // marginRight: '10%',
-    // marginLeft: '10%',
     // borderColor: 'white',
     // borderWidth: '10%',
   },
-  upUICaontainer: {
-    flex: 1,
-    flexDirection: 'row',
-    backgroundColor: 'transparent',
-    marginTop: '15%',
-    alignItems: 'center',
-    paddingLeft: '5%',
-    paddingRight: '5%',
-    justifyContent: 'space-between', // Distribute buttons evenly
-  },
-  downUIContainer: {
+  buttonContainer: {
     flex: 1,
     flexDirection: 'row',
     backgroundColor: 'transparent',
     margin: 64,
-    alignItems: 'center',
-    justifyContent: 'center', // Distribute buttons evenly
+    justifyContent: 'space-between', // Distribute buttons evenly
   },
   button: {
     flex: 1,
@@ -493,12 +475,18 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   openModalButton: {
-    width: '30%',
-    borderRadius: 10,
+    position: 'absolute',
+    top: '40%',
+    right: '5%',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     backgroundColor: '#000',
     justifyContent: 'center',
     alignItems: 'center',
+    alignSelf: 'flex-end',
     alignItems: 'center',
+    marginHorizontal: 10,
   },
   modalContainer: {
     flex: 1,
@@ -566,7 +554,6 @@ const styles = StyleSheet.create({
   scrollView: {
     flexDirection: 'row',
     alignItems: 'center',
-    width: width * 3,
   },
   imageContainer: {
     width: width, // Ensure each image takes up the full width of the screen

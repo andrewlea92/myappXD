@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { View, Image, StyleSheet, Text, TouchableOpacity, Clipboard, Alert, ScrollView, Dimensions, Modal, Animated } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import * as FileSystem from 'expo-file-system';
@@ -40,6 +40,7 @@ const saveImageToMediaLibrary = async (base64DataUrl) => {
 export default function ResultScreen({ route, navigation }) {
   const { processedUrls, aiText } = route.params;
   const scaleAnim = React.useRef(new Animated.Value(1)).current;
+  const [currentPage, setCurrentPage] = useState(0);
 
   const handlePressIn = () => {
     console.log('press in');
@@ -80,6 +81,28 @@ export default function ResultScreen({ route, navigation }) {
     }
   };
 
+  const handleScroll = (event) => {
+    const contentOffsetX = event.nativeEvent.contentOffset.x;
+    const currentPage = Math.floor(contentOffsetX / width);
+    setCurrentPage(currentPage);
+  };
+
+  const renderDots = () => {
+    return (
+      <View style={styles.dotsContainer}>
+      {processedUrls.map((url, index) => (
+        <View
+          key={index}
+          style={[
+            styles.dot,
+            index === currentPage ? styles.activeDot : styles.inactiveDot,
+          ]}
+        />
+      ))}
+      </View>
+    );
+  };
+
   return (
     <PanGestureHandler onHandlerStateChange={handleGesture}>
       <View style={styles.background}>
@@ -92,7 +115,9 @@ export default function ResultScreen({ route, navigation }) {
               horizontal
               pagingEnabled
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.imageScrollView}>
+              contentContainerStyle={styles.imageScrollView}
+              onScroll={handleScroll}
+              scrollEventThrottle={16}>
               {processedUrls.map((url, index) => (
                 <View key={index} style={styles.imageContainer}>
                   <Image
@@ -103,6 +128,7 @@ export default function ResultScreen({ route, navigation }) {
                 </View>
               ))}
             </ScrollView>
+            {renderDots()}
             <View style={styles.toolbar}>
               <TouchableOpacity
                 style={styles.circleButton}
@@ -170,7 +196,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingTop: '5%',
-    paddingBottom: '5%',
+    // paddingBottom: '5%',
     width: width * 3,
     height: '90%',
   },
@@ -235,5 +261,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginHorizontal: 10,
+  },
+  dotsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    // marginTop: '2%', // Ensure distance from squareFocusArea
+  },
+  dot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginHorizontal: 5,
+  },
+  activeDot: {
+    backgroundColor: 'black',
+  },
+  inactiveDot: {
+    backgroundColor: '#D3D3D3',
   },
 });
