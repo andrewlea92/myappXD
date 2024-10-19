@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { View, Image, StyleSheet, TextInput, ScrollView, Text, TouchableOpacity, ActivityIndicator, Modal } from 'react-native';
+import { Rating, AirbnbRating } from 'react-native-ratings';
 import { generateAiCaption, generateAiCaptionWithAudio } from './AiApiHandler';
 import { debugCaption, debugCaptionWithAudio, debugMode } from './DebugApiHandler';
 import { Audio } from 'expo-av';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import CustomRating from './components/rating'
 
 export default function ProcessedImagesScreen({ route, navigation }) {
   const { processedUrls } = route.params;
@@ -18,6 +20,29 @@ export default function ProcessedImagesScreen({ route, navigation }) {
   const [isRecordingMode, setIsRecordingMode] = useState(false); // 新增狀態來控制錄音或手動輸入
   const [isModalVisible, setIsModalVisible] = useState(false);
 
+  /* -------------------------------------------------------------------------- */
+  /*                               Rating Related                               */
+  /* -------------------------------------------------------------------------- */
+
+  const [tasteRating, setTasteRating] = useState(0)
+  const [envRating, setEnvRating] = useState(0)
+  const [moneyRating, setMoneyRating] = useState(0)
+
+  const handleTasteRating = (rating) => {
+    setTasteRating(rating)
+  }
+
+  const handleEnvRating = (rating) => {
+    setEnvRating(rating)
+  }
+
+  const handleMoneyRating = (rating) => {
+    setMoneyRating(rating)
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*                                                                            */
+  /* -------------------------------------------------------------------------- */
 
   const toggleModal = () => {
     setIsModalVisible(!isModalVisible);
@@ -134,6 +159,18 @@ export default function ProcessedImagesScreen({ route, navigation }) {
         />
       </TouchableOpacity>
     </View>
+
+    {/* 評分系統 */}
+    <View style={styles.rateContainer}>
+      <CustomRating title={'口味'} setRating={handleTasteRating}/>
+      <CustomRating title={'價格'} setRating={handleMoneyRating}/>
+      <CustomRating title={'環境'} setRating={handleEnvRating}/>
+
+      {/* <Text style={styles.buttonText}>{tasteRating}</Text>
+      <Text style={styles.buttonText}>{moneyRating}</Text>
+      <Text style={styles.buttonText}>{envRating}</Text> */}
+    </View>
+
     {/* <TouchableOpacity style={styles.button} onPress={handleAiTextWithAudio}>
       <Text style={styles.buttonText}>錄音檔生成 AI 文案</Text>
     </TouchableOpacity> */}
@@ -223,6 +260,13 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     borderWidth: 1,
     paddingHorizontal: 10,
+    marginTop: 20,
+  },
+  rateContainer: {
+    // flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between', // 可選：讓按鈕平均分佈
+    width: '80%',
     marginTop: 20,
   },
   buttonContainer: {
