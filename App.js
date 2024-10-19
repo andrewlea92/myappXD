@@ -8,6 +8,7 @@ import ImageDisplayScreen from './ImageDisplayScreen'; // Import the new screen
 import ProcessedImagesScreen from './ProcessedImagesScreen';
 import ResultScreen from './ResultScreen';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { MaterialIcons } from '@expo/vector-icons';
 import { generateAiOverlay } from './AiApiHandler';
 import { debugOverlay, debugMode } from './DebugApiHandler';
 import Slider from '@react-native-community/slider';
@@ -240,31 +241,38 @@ function CameraScreen({ navigation }) {
           <PanGestureHandler onGestureEvent={handleGesture}>
           {/* 中間正方形可視區域 */}
           <View style={styles.squareFocusArea}>
+            {loading && <ActivityIndicator size="large" color="#000" style={styles.loadingIndicator} />}
             {renderOverlayImages()}
-            
-            
           </View>
           </PanGestureHandler>
 
           {/* 下方灰階遮罩 */}
           <View style={styles.overlay}>
+            
+            {/* 底部的點點 */}
+            {renderDots()}
 
             {/* 底部的滑動條 */}
-            <View style={styles.sliderContainer}>
-              <Text style={styles.sliderLabel}>Overlay Opacity</Text>
-              <Slider
-                style={styles.slider}
-                minimumValue={0}
-                maximumValue={1}
-                value={overlayOpacity}
-                onValueChange={setOverlayOpacity}
-                minimumTrackTintColor="#000"
-                maximumTrackTintColor="#ccc"
-                thumbTintColor="#fff"
-              />
+            <View style={overlayImages.length?styles.sliderContainer:styles.hiddenSliderContainer}>
+              <View style={styles.sliderRow}>
+                <MaterialIcons name="opacity" size={30} color="white" />
+                {/* <Text style={styles.sliderLabel}>Overlay Opacity</Text> */}
+                <Slider
+                  
+                  disabled={overlayImages.length?false:true}
+                  style={styles.slider}
+                  minimumValue={0}
+                  maximumValue={1}
+                  value={overlayOpacity}
+                  onValueChange={setOverlayOpacity}
+                  minimumTrackTintColor="#000"
+                  maximumTrackTintColor="#ccc"
+                  thumbTintColor="#fff"
+                  
+                />
+              </View>
             </View>
 
-            {renderDots()}
             {/* 放置在下方灰階遮罩中的按鈕 */}
             <View style={styles.buttonContainer}>
               <TouchableOpacity style={styles.circleButton} onPress={toggleCameraFacing}>
@@ -281,7 +289,7 @@ function CameraScreen({ navigation }) {
 
         </CameraView>
 
-      {loading && <ActivityIndicator size="large" color="#000" style={styles.loadingIndicator} />}
+      
 
       {/* 彈出式視窗 */}
       <Modal
@@ -404,11 +412,12 @@ const styles = StyleSheet.create({
   },
   loadingIndicator: {
     position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: [{ translateX: -50 }, { translateY: -50 }],
+    top: '45%',
+    left: '46%',
+    // transform: [{ translateX: -50 }, { translateY: -50 }],
   },
-  sliderContainer: {
+  hiddenSliderContainer: {
+    display: 'none',
     position: 'absolute',
     // top: '50%',
     // right: 50, // 將 right 屬性調整為 10，向左移動
@@ -423,16 +432,35 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 10,
   },
+  sliderContainer: {
+    position: 'absolute',
+    justifyContent: 'center',
+    height: 100,
+    width: '80%',  // 設定寬度為 80% 讓滑動條佔據螢幕的 80%
+    bottom: '55%',  // 將滑動條放置在距離螢幕底部 30 像素的位置
+    left: '10%',
+    right: 0,    // left 和 right 設置為 0 以使滑動條水平居中
+    padding: 10,
+    borderRadius: 10,
+  },
+  sliderRow: {
+    flexDirection: 'row',  // Align items horizontally
+    alignItems: 'center',  // Vertically center the items
+    margin: 0,
+    justifyContent: 'space-between',  // Adjust spacing between Text and Slider
+  },
   sliderLabel: {
     fontSize: 18,
     fontWeight: 'bold',
     color: 'white',
     marginBottom: 10,
-    textAlign: 'center',
+    // textAlign: 'center',
   },
   slider: {
-    width: '100%',
+    // width: '100%',
+    flex: 1,
     height: 40,
+    marginLeft: 10,
   },
   foodInput: {
     position: 'absolute',
@@ -516,7 +544,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 20, // Ensure distance from squareFocusArea
+    marginTop: '2%', // Ensure distance from squareFocusArea
   },
   dot: {
     width: 10,
