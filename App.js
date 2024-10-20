@@ -227,7 +227,7 @@ function CameraScreen({ navigation }) {
         <View style={styles.bottom_overlay}>
 
           {/* 底部的點點 */}
-          <Dots activeIdx={shownOverlayImageIdx} totalIdx={overlayImages.length}/>
+          <Dots activeIdx={shownOverlayImageIdx} totalIdx={overlayImages.length} />
 
           {/* 底部的滑動條 */}
           <View style={overlayImages.length ? styles.sliderContainer : styles.hiddenSliderContainer}>
@@ -251,11 +251,11 @@ function CameraScreen({ navigation }) {
 
           {/* 放置在下方灰階遮罩中的按鈕 */}
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.circleButton} onPress={toggleCameraFacing}>
-              <Icon name="refresh" size={30} color="white" />
+            <TouchableOpacity style={styles.circleButton} onPress={openModal}>
+              <Icon name="lightbulb-o" size={30} color="white" />
             </TouchableOpacity>
             <TouchableOpacity style={styles.circleButton} onPress={takePicture} disabled={loading}>
-              <Icon name="camera" size={30} color="white" />
+              <Icon name="camera" size={25} color="white" />
             </TouchableOpacity>
 
             {/* <TouchableOpacity style={styles.circleButton} onPress={handleAiOverlay} disabled={loading}>
@@ -263,7 +263,7 @@ function CameraScreen({ navigation }) {
             </TouchableOpacity> */}
 
             {/* This Button Can Vibrate! */}
-            <VibratingButton icon_name={"magic"} size={30} handleFunc={handleAiOverlay} disabled={loading} customIcon={require('./assets/Gemini_icon.png')}/>
+            <VibratingButton icon_name={"magic"} size={30} handleFunc={handleAiOverlay} disabled={loading} customIcon={require('./assets/Gemini_icon.png')} />
           </View>
         </View>
 
