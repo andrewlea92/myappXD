@@ -17,6 +17,7 @@ import * as ImageManipulator from 'expo-image-manipulator';
 
 import CoverScreen from './CoverScreen';
 import VibratingButton from './components/VibratingButton'
+import { Bar } from 'react-native-progress';
 import Dots from './components/Dots';
 
 
@@ -377,6 +378,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     // borderColor: 'white',
     // borderWidth: '10%',
+  },
+  upUICaontainer: {
+    flex: 1,
+    flexDirection: 'row',
+    backgroundColor: 'transparent',
+    marginTop: '15%',
+    alignItems: 'center',
+    paddingLeft: '5%',
+    paddingRight: '5%',
+    justifyContent: 'space-between'
   },
   buttonContainer: {
     flex: 1,

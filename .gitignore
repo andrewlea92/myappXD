@@ -36,6 +36,4 @@ yarn-error.*
 
 app.json
 babel.config.js
-package-lock.json
-package.json
 %ProgramData%/*
