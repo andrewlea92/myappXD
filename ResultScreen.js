@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: 'black',
-    textAlign: 'center',
+    textAlign: 'left',
     padding: '4%',
     flexShrink: 0
   },
