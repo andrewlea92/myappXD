@@ -9,6 +9,8 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 LogBox.ignoreAllLogs(); // for suppressing clipboard warning
 
+import Dots from './components/Dots';
+
 const { width, height } = Dimensions.get('window');
 
 // Function to save Base64 image to Media Library
@@ -87,21 +89,6 @@ export default function ResultScreen({ route, navigation }) {
     setCurrentPage(currentPage);
   };
 
-  const renderDots = () => {
-    return (
-      <View style={styles.dotsContainer}>
-      {processedUrls.map((url, index) => (
-        <View
-          key={index}
-          style={[
-            styles.dot,
-            index === currentPage ? styles.activeDot : styles.inactiveDot,
-          ]}
-        />
-      ))}
-      </View>
-    );
-  };
 
   return (
     <PanGestureHandler onHandlerStateChange={handleGesture}>
@@ -128,7 +115,9 @@ export default function ResultScreen({ route, navigation }) {
                 </View>
               ))}
             </ScrollView>
-            {renderDots()}
+            
+            <Dots activeIdx={currentPage} totalIdx={processedUrls.length}/>
+
             <View style={styles.toolbar}>
               <TouchableOpacity
                 style={styles.circleButton}

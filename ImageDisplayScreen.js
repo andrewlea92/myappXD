@@ -4,6 +4,8 @@ import { generateAiProcessedImage } from './AiApiHandler';
 import { debugProcessedImage, debugMode } from './DebugApiHandler';
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 
+import Dots from './components/Dots';
+
 const { width, height } = Dimensions.get('window');
 
 export default function ImageDisplayScreen({ route, navigation }) {
@@ -73,22 +75,6 @@ export default function ImageDisplayScreen({ route, navigation }) {
     setCurrentPage(currentPage);
   };
 
-  const renderDots = () => {
-    return (
-      <View style={styles.dotsContainer}>
-      {(processedUrls.length > 0 ? processedUrls : imageUrls).map((_, index) => (
-        <View
-          key={index}
-          style={[
-            styles.dot,
-            index === currentPage ? styles.activeDot : styles.inactiveDot,
-          ]}
-        />
-      ))}
-      </View>
-    );
-  };
-
   return (
     <PanGestureHandler onHandlerStateChange={handleGesture}>
       <View style={styles.background}>
@@ -110,7 +96,9 @@ export default function ImageDisplayScreen({ route, navigation }) {
             </View>
           ))}
         </ScrollView>
-        {renderDots()}
+        
+        <Dots activeIdx={currentPage} totalIdx={processedUrls.length > 0 ? processedUrls.length : imageUrls.length}/>
+        
         <View style={styles.alertContainer}>
           {showAlert && (
             <Animated.Text style={{ ...styles.alertText, opacity: fadeAnim }}>AI 修圖完畢!</Animated.Text>

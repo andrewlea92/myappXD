@@ -1,12 +1,10 @@
 import { StyleSheet, View} from 'react-native';
 
 
-const Dots = (activeIdx, totalIdx) => {
-
-	const items = Array(totalIdx)
+const Dots = ( {activeIdx, totalIdx} ) => {
 	return (
 		<View style={styles.dotsContainer}>
-			{items.map((_, index) => (
+			{Array.from({ length: totalIdx }).map((_, index) => (
 				<View
 					key={index}
 					style={[

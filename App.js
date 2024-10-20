@@ -194,22 +194,6 @@ function CameraScreen({ navigation }) {
     }
   };
 
-  const renderDots = () => {
-    return (
-      <View style={styles.dotsContainer}>
-        {overlayImages.map((_, index) => (
-          <View
-            key={index}
-            style={[
-              styles.dot,
-              index === shownOverlayImageIdx ? styles.activeDot : styles.inactiveDot,
-            ]}
-          />
-        ))}
-      </View>
-    );
-  };
-
   return (
     <View style={styles.container}>
 
@@ -243,14 +227,12 @@ function CameraScreen({ navigation }) {
         <View style={styles.bottom_overlay}>
 
           {/* 底部的點點 */}
-          {renderDots()}
-          {/* <Dots activeIdx={shownOverlayImageIdx} totalIdx={overlayImages.length}/> */}
+          <Dots activeIdx={shownOverlayImageIdx} totalIdx={overlayImages.length}/>
 
           {/* 底部的滑動條 */}
           <View style={overlayImages.length ? styles.sliderContainer : styles.hiddenSliderContainer}>
             <View style={styles.sliderRow}>
               <MaterialIcons name="opacity" size={30} color="black" />
-              {/* <Text style={styles.sliderLabel}>Overlay Opacity</Text> */}
               <Slider
 
                 disabled={overlayImages.length ? false : true}
