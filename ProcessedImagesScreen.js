@@ -534,6 +534,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: '2%', // Ensure distance from squareFocusArea
+    paddingBottom: '5%',
   },
   dot: {
     width: 10,

@@ -279,7 +279,7 @@ function CameraScreen({ navigation }) {
             </TouchableOpacity> */}
 
             {/* This Button Can Vibrate! */}
-            <VibratingButton icon_name={"magic"} size={30} handleFunc={handleAiOverlay} disabled={loading} />
+            <VibratingButton icon_name={"magic"} size={30} handleFunc={handleAiOverlay} disabled={loading} customIcon={require('./assets/Gemini_icon.png')}/>
           </View>
         </View>
 

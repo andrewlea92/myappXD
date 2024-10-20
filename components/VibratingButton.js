@@ -1,8 +1,8 @@
 import React from 'react';
-import { TouchableOpacity, Vibration, Text, StyleSheet } from 'react-native';
+import { TouchableOpacity, Vibration, Text, StyleSheet, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-const VibratingButton = ({icon_name, size, disabled, handleFunc}) => {
+const VibratingButton = ({icon_name, size, disabled, handleFunc, customIcon}) => {
   const handlePress = () => {
     Vibration.vibrate();  // Trigger vibration on button press
     // Add other functionality here, like toggling camera facing
@@ -11,7 +11,11 @@ const VibratingButton = ({icon_name, size, disabled, handleFunc}) => {
 
   return (
     <TouchableOpacity style={styles.circleButton} onPress={handlePress} disabled={disabled}>
-      <Icon name={icon_name} size={size} color="white" />
+      {customIcon ? (
+        <Image source={customIcon} style={{ width: size, height: size }} />
+      ) : (
+        <Icon name={icon_name} size={size} color="white" />
+      )}
     </TouchableOpacity>
   );
 };

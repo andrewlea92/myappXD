@@ -196,9 +196,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingTop: '5%',
-    // paddingBottom: '5%',
+    paddingBottom: '5%',
     width: width * 3,
-    height: '90%',
+    height: '100%',
   },
   imageContainer: {
     alignItems: 'center',
@@ -261,6 +261,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginHorizontal: 10,
+    marginTop: 100,
   },
   dotsContainer: {
     flexDirection: 'row',
