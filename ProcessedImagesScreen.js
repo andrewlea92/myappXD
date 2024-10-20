@@ -24,6 +24,7 @@ export default function ProcessedImagesScreen({ route, navigation }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackObject, setPlaybackObject] = useState(null);
+  const [currentPage, setCurrentPage] = useState(0);
 
   /* -------------------------------------------------------------------------- */
   /*                               Rating Related                               */
@@ -243,6 +244,27 @@ export default function ProcessedImagesScreen({ route, navigation }) {
       }
     }
   };
+  const handleScroll = (event) => {
+    const contentOffsetX = event.nativeEvent.contentOffset.x;
+    const currentPage = Math.floor(contentOffsetX / width);
+    setCurrentPage(currentPage);
+  };
+
+  const renderDots = () => {
+    return (
+      <View style={styles.dotsContainer}>
+      {(processedUrls.length > 0 ? processedUrls : imageUrls).map((_, index) => (
+        <View
+          key={index}
+          style={[
+            styles.dot,
+            index === currentPage ? styles.activeDot : styles.inactiveDot,
+          ]}
+        />
+      ))}
+      </View>
+    );
+  };
 
   return (
     <PanGestureHandler onHandlerStateChange={handleGesture}>
@@ -259,6 +281,8 @@ export default function ProcessedImagesScreen({ route, navigation }) {
             pagingEnabled
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.scrollView}
+            onScroll={handleScroll}
+            scrollEventThrottle={16}
           >
             {(processedUrls.length > 0 ? processedUrls : imageUrls).map((url, index) => (
               <View key={index} style={styles.imageContainer}>
@@ -270,7 +294,7 @@ export default function ProcessedImagesScreen({ route, navigation }) {
               </View>
             ))}
           </ScrollView>
-
+          {renderDots()}
 
           <View style={styles.buttonContainer}>
             {!isRecordingComplete ? (
@@ -504,5 +528,23 @@ const styles = StyleSheet.create({
     width: width - 20,
     height: width - 20,
     borderRadius: 15
+  },
+  dotsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: '2%', // Ensure distance from squareFocusArea
+  },
+  dot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginHorizontal: 5,
+  },
+  activeDot: {
+    backgroundColor: 'black',
+  },
+  inactiveDot: {
+    backgroundColor: '#D3D3D3',
   },
 });

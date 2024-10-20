@@ -13,6 +13,7 @@ export default function ImageDisplayScreen({ route, navigation }) {
   const [showAlert, setShowAlert] = useState(false); // Add state for alert
   const [loading, setLoading] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const [currentPage, setCurrentPage] = useState(0);
 
 
   useEffect(() => {
@@ -66,6 +67,28 @@ export default function ImageDisplayScreen({ route, navigation }) {
     }
   };
 
+  const handleScroll = (event) => {
+    const contentOffsetX = event.nativeEvent.contentOffset.x;
+    const currentPage = Math.floor(contentOffsetX / width);
+    setCurrentPage(currentPage);
+  };
+
+  const renderDots = () => {
+    return (
+      <View style={styles.dotsContainer}>
+      {(processedUrls.length > 0 ? processedUrls : imageUrls).map((_, index) => (
+        <View
+          key={index}
+          style={[
+            styles.dot,
+            index === currentPage ? styles.activeDot : styles.inactiveDot,
+          ]}
+        />
+      ))}
+      </View>
+    );
+  };
+
   return (
     <PanGestureHandler onHandlerStateChange={handleGesture}>
       <View style={styles.background}>
@@ -74,7 +97,9 @@ export default function ImageDisplayScreen({ route, navigation }) {
           horizontal
           pagingEnabled
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.scrollView}>
+          contentContainerStyle={styles.scrollView}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}>
           {(processedUrls.length > 0 ? processedUrls : imageUrls).map((url, index) => (
             <View key={index} style={styles.imageContainer}>
               <Image
@@ -85,6 +110,7 @@ export default function ImageDisplayScreen({ route, navigation }) {
             </View>
           ))}
         </ScrollView>
+        {renderDots()}
         <View style={styles.alertContainer}>
           {showAlert && (
             <Animated.Text style={{ ...styles.alertText, opacity: fadeAnim }}>AI 修圖完畢!</Animated.Text>
@@ -220,5 +246,23 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)', // Slight gray background
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  dotsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: '2%', // Ensure distance from squareFocusArea
+  },
+  dot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginHorizontal: 5,
+  },
+  activeDot: {
+    backgroundColor: 'black',
+  },
+  inactiveDot: {
+    backgroundColor: '#D3D3D3',
   },
 });
