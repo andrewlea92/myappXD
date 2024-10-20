@@ -1,7 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Camera, CameraView, useCameraPermissions } from 'expo-camera';
-import { Button, StyleSheet, Text, TouchableOpacity, View, Image, ActivityIndicator, Vibration, TextInput, Modal, ScrollView, Dimensions } from 'react-native';
+import { Bar, Button, StyleSheet, Text, TouchableOpacity, View, Image, ActivityIndicator, Vibration, TextInput, Modal, ScrollView, Dimensions } from 'react-native';
 import * as MediaLibrary from 'expo-media-library';
 import * as React from "react";
 import ImageDisplayScreen from './ImageDisplayScreen'; // Import the new screen
@@ -17,6 +17,7 @@ import * as ImageManipulator from 'expo-image-manipulator';
 
 import CoverScreen from './CoverScreen';
 import VibratingButton from './components/VibratingButton'
+import Dots from './components/Dots';
 
 
 
@@ -241,7 +242,8 @@ function CameraScreen({ navigation }) {
         <View style={styles.bottom_overlay}>
 
           {/* 底部的點點 */}
-          {renderDots()}
+          {/* {renderDots()} */}
+          <Dots activeIdx={shownOverlayImageIdx} totalIdx={overlayImages.length}/>
 
           {/* 底部的滑動條 */}
           <View style={overlayImages.length ? styles.sliderContainer : styles.hiddenSliderContainer}>
