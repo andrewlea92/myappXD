@@ -95,6 +95,7 @@ export default function ResultScreen({ route, navigation }) {
       <View style={styles.background}>
         <ScrollView
           pagingEnabled
+          nestedScrollEnabled={true}
           contentContainerStyle={styles.allScrollView}>
           <View style={{ height: '50%', width: '100%', alignItems: 'center' }}>
             <Text style={styles.title}>Image</Text>
@@ -115,8 +116,8 @@ export default function ResultScreen({ route, navigation }) {
                 </View>
               ))}
             </ScrollView>
-            
-            <Dots activeIdx={currentPage} totalIdx={processedUrls.length}/>
+
+            <Dots activeIdx={currentPage} totalIdx={processedUrls.length} />
 
             <View style={styles.toolbar}>
               <TouchableOpacity
@@ -134,7 +135,7 @@ export default function ResultScreen({ route, navigation }) {
           <View style={{ height: '50%', width: '100%' }}>
             <Text style={styles.title}>Copy the text</Text>
             <ScrollView
-              horizontal={false}
+              nestedScrollEnabled={true}
               contentContainerStyle={styles.aiTextScrollView}>
               <Text style={styles.aiText}>{aiText}</Text>
             </ScrollView>
@@ -146,6 +147,11 @@ export default function ResultScreen({ route, navigation }) {
                 onPressIn={handlePressIn}
                 onPressOut={handlePressOut}>
                 <Icon name="copy" size={'30%'} color="white" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.circleButton}
+                onPress={() => navigation.navigate('Camera')}>
+                <Icon name="home" size={'30%'} color="white" />
               </TouchableOpacity>
             </View>
           </View>
@@ -202,12 +208,13 @@ const styles = StyleSheet.create({
     borderRadius: 15
   },
   toolbar: {
-    flexDirection: 'column',
+    flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
     height: '20%',
     width: '100%',
-    marginBottom: '20%'
+    marginBottom: '15%',
+    paddingHorizontal: '5%',
   },
   button: {
     backgroundColor: 'black',
@@ -223,7 +230,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   aiTextScrollView: {
-    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingTop: '5%',
@@ -235,11 +241,12 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   aiText: {
-    marginTop: 20,
     fontSize: 16,
     fontWeight: 'bold',
     color: 'black',
     textAlign: 'center',
+    padding: '4%',
+    flexShrink: 0
   },
   circleButton: {
     width: 60,
