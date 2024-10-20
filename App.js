@@ -377,6 +377,16 @@ const styles = StyleSheet.create({
     // borderColor: 'white',
     // borderWidth: '10%',
   },
+  upUICaontainer: {
+    flex: 1,
+    flexDirection: 'row',
+    backgroundColor: 'transparent',
+    marginTop: '15%',
+    alignItems: 'center',
+    paddingLeft: '5%',
+    paddingRight: '5%',
+    justifyContent: 'space-between'
+  },
   buttonContainer: {
     flex: 1,
     flexDirection: 'row',
