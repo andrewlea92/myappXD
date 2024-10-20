@@ -18,6 +18,7 @@ import * as ImageManipulator from 'expo-image-manipulator';
 import CoverScreen from './CoverScreen';
 import VibratingButton from './components/VibratingButton'
 import { Bar } from 'react-native-progress';
+import GradientProgressBar from './components/gradientBar';
 
 
 
@@ -222,12 +223,12 @@ function CameraScreen({ navigation }) {
               progress={imageCount / 3}
               width={width}
               height={10}
-              color='black'
-              borderWidth={5}
-              borderRadius={10}
-              borderColor='black'
+              borderWidth={0}
+              color={'black'}
               animationType='spring'
+              backgroundColor={'#e0e0df'}
             />
+            {/* <GradientProgressBar progress={imageCount / 3} /> */}
           </View>
         </View>
 
@@ -337,7 +338,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   camera: {
-    flex: 1,
+    ...StyleSheet.absoluteFillObject,
 
   },
   overlayImage: {
