@@ -17,6 +17,7 @@ import * as ImageManipulator from 'expo-image-manipulator';
 
 import CoverScreen from './CoverScreen';
 import VibratingButton from './components/VibratingButton'
+import { Bar } from 'react-native-progress';
 
 
 
